@@ -8,7 +8,8 @@ gradlebuildJava.usedInWorkers()
 
 dependencies {
 
-    implementation(project(":base-annotations"))
+    api(project(":base-annotations"))
+
     implementation(project(":files")) {
         because("We need org.gradle.internal.file.PathTraversalChecker")
     }
@@ -22,4 +23,12 @@ dependencies {
     integTestImplementation(project(":logging"))
 
     integTestDistributionRuntimeOnly(project(":distributions-full"))
+}
+
+dependencyAnalysis {
+    issues {
+        onAny {
+            severity("fail")
+        }
+    }
 }

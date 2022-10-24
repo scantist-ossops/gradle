@@ -7,22 +7,28 @@ description = "Implementation of configuration model types and annotation metada
 dependencies {
     api(project(":core-api"))
     api(project(":problems-api"))
+    api(project(":base-annotations"))
+    api(project(":hashing"))
+    api(project(":process-services"))
+    api(project(":base-services"))
+    api(project(":files"))
+    api(project(":functional"))
+    api(project(":logging"))
+    api(project(":messaging"))
+    api(project(":persistent-cache"))
+    api(project(":snapshots"))
 
-    implementation(project(":base-services"))
+    api(libs.asm)
+    api(libs.jsr305)
+    api(libs.inject)
+    api(libs.groovy)
+    api(libs.guava)
+
     implementation(project(":base-services-groovy"))
-    implementation(project(":functional"))
-    implementation(project(":logging"))
-    implementation(project(":messaging"))
-    implementation(project(":persistent-cache"))
-    implementation(project(":snapshots"))
 
     implementation(libs.futureKotlin("stdlib"))
-    implementation(libs.inject)
-    implementation(libs.groovy)
     implementation(libs.slf4jApi)
-    implementation(libs.guava)
     implementation(libs.commonsLang)
-    implementation(libs.asm)
 
     testFixturesApi(testFixtures(project(":diagnostics")))
     testFixturesApi(testFixtures(project(":core")))
@@ -72,4 +78,12 @@ packageCycles {
 // Remove as part of fixing https://github.com/gradle/configuration-cache/issues/585
 tasks.configCacheIntegTest {
     systemProperties["org.gradle.configuration-cache.internal.test-disable-load-after-store"] = "true"
+}
+
+dependencyAnalysis {
+    issues {
+        onAny {
+            severity("fail")
+        }
+    }
 }

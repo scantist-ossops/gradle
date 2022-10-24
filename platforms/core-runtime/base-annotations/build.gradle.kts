@@ -9,5 +9,13 @@ gradlebuildJava.usedInWorkers()
 
 dependencies {
     api(libs.jsr305)
-    api(libs.jetbrainsAnnotations)
+    compileOnly(libs.jetbrainsAnnotations)
+}
+
+dependencyAnalysis {
+    issues {
+        onAny {
+            severity("fail")
+        }
+    }
 }
