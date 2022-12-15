@@ -57,10 +57,3 @@ packageCycles {
 
 jmh.includes = listOf("HashingAlgorithmsBenchmark")
 
-dependencyAnalysis {
-    issues {
-        onAny {
-            severity("fail")
-        }
-    }
-}

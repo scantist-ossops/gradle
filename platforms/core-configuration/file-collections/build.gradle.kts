@@ -51,11 +51,3 @@ packageCycles {
     // Some cycles have been inherited from the time these classes were in :core
     excludePatterns.add("org/gradle/api/internal/file/collections/**")
 }
-
-dependencyAnalysis {
-    issues {
-        onAny {
-            severity("fail")
-        }
-    }
-}

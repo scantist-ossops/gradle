@@ -14,11 +14,3 @@ dependencies {
 
     implementation(libs.guava)
 }
-
-dependencyAnalysis {
-    issues {
-        onAny {
-            severity("fail")
-        }
-    }
-}

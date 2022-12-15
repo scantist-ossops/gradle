@@ -79,11 +79,3 @@ packageCycles {
 tasks.configCacheIntegTest {
     systemProperties["org.gradle.configuration-cache.internal.test-disable-load-after-store"] = "true"
 }
-
-dependencyAnalysis {
-    issues {
-        onAny {
-            severity("fail")
-        }
-    }
-}

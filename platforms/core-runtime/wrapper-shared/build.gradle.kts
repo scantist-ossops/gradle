@@ -24,11 +24,3 @@ dependencies {
 
     integTestDistributionRuntimeOnly(project(":distributions-full"))
 }
-
-dependencyAnalysis {
-    issues {
-        onAny {
-            severity("fail")
-        }
-    }
-}

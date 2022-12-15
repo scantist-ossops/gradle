@@ -48,11 +48,3 @@ strictCompile {
 
 integTest.usesJavadocCodeSnippets = true
 testFilesCleanup.reportOnly = true
-
-dependencyAnalysis {
-    issues {
-        onAny {
-            severity("fail")
-        }
-    }
-}

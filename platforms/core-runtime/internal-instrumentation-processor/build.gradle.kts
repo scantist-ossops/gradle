@@ -19,15 +19,18 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.javaPoet)
+    api(libs.asm)
+    api(libs.javaPoet)
+    api(libs.jsr305)
+
+    implementation(libs.asmTree)
+    implementation(libs.jacksonAnnotations)
+    implementation(libs.jacksonDatabind)
 
     implementation(project(":internal-instrumentation-api"))
     implementation(project(":base-services"))
     implementation(project(":model-core"))
-
-    implementation(libs.asm)
-    implementation(libs.asmCommons)
-    implementation(libs.jacksonDatabind)
+    implementation(project(":core-api"))
 
     testImplementation(libs.compileTesting)
     testImplementation(project(":core"))

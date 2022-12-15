@@ -45,11 +45,3 @@ jmh {
     warmupIterations = 10
     synchronizeIterations = false
 }
-
-dependencyAnalysis {
-    issues {
-        onAny {
-            severity("fail")
-        }
-    }
-}
