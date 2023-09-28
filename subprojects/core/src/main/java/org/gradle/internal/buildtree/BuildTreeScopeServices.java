@@ -69,6 +69,7 @@ import org.gradle.internal.problems.DefaultProblemLocationAnalyzer;
 import org.gradle.internal.service.ServiceRegistration;
 import org.gradle.internal.service.scopes.PluginServiceRegistry;
 import org.gradle.internal.service.scopes.Scopes;
+import org.gradle.internal.shareddata.DefaultSharedDataRegistry;
 
 import java.util.List;
 
@@ -104,6 +105,7 @@ public class BuildTreeScopeServices {
         registration.add(DefaultExceptionAnalyser.class);
         registration.add(ConfigurationCacheableIdFactory.class);
         registration.add(TaskIdentityFactory.class);
+        registration.add(DefaultSharedDataRegistry.class);
         modelServices.applyServicesTo(registration);
     }
 
