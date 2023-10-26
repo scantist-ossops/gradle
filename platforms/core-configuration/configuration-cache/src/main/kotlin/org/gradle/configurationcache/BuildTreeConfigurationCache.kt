@@ -20,6 +20,7 @@ import org.gradle.internal.buildtree.BuildTreeWorkGraph
 import org.gradle.internal.component.local.model.LocalComponentGraphResolveState
 import org.gradle.internal.service.scopes.Scopes
 import org.gradle.internal.service.scopes.ServiceScope
+import org.gradle.internal.shareddata.SharedDataStorage
 import org.gradle.util.Path
 
 
@@ -65,6 +66,8 @@ interface BuildTreeConfigurationCache {
      * Loads cached dependency resolution metadata for the given project, if available, or else runs the given function to create it and then writes the result to the cache.
      */
     fun loadOrCreateProjectMetadata(identityPath: Path, creator: () -> LocalComponentGraphResolveState): LocalComponentGraphResolveState
+
+    fun loadOrCreateProjectSharedData(identityPath: Path, creator: () -> SharedDataStorage.ProjectProducedSharedData): SharedDataStorage.ProjectProducedSharedData
 
     /**
      * Flushes any remaining state to the cache and closes any resources
