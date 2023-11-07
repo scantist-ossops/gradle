@@ -23,6 +23,7 @@ import org.gradle.api.Project
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.provider.Property
 import org.gradle.integtests.fixtures.AbstractIntegrationSpec
+import org.gradle.integtests.fixtures.GroovyBuildScriptLanguage
 import org.gradle.integtests.fixtures.executer.OutputScrapingExecutionFailure
 import org.gradle.integtests.fixtures.executer.OutputScrapingExecutionResult
 import org.gradle.internal.Pair
@@ -84,6 +85,16 @@ trait ToolingApiSpec {
             def artifact = project.layout.buildDirectory.file("out.txt")
             implementation.outgoing.artifact(artifact)
         """)
+    }
+
+    void withMyModelBuilderAndPluginImplementationInBuildSrc(
+        @GroovyBuildScriptLanguage String myModelBuilderImplementation,
+        @GroovyBuildScriptLanguage String pluginImplementation
+    ) {
+        addModelImplementation("buildSrc")
+        addModelBuilderImplementation("buildSrc", myModelBuilderImplementation)
+        addPluginImplementation("buildSrc", pluginImplementation)
+        addPluginBuildScript("buildSrc")
     }
 
     void withSomeNullableToolingModelBuilderPluginInBuildSrc() {
