@@ -18,6 +18,7 @@ package org.gradle.api.internal.tasks.compile;
 import org.gradle.api.internal.ClassPathRegistry;
 import org.gradle.api.internal.tasks.compile.daemon.ProcessIsolatedCompilerWorkerExecutor;
 import org.gradle.api.internal.tasks.compile.processing.AnnotationProcessorDetector;
+import org.gradle.initialization.layout.ProjectCacheDir;
 import org.gradle.api.problems.Problems;
 import org.gradle.internal.Factory;
 import org.gradle.jvm.toolchain.internal.JavaCompilerFactory;
@@ -39,6 +40,8 @@ public class DefaultJavaCompilerFactory implements JavaCompilerFactory {
     private final AnnotationProcessorDetector processorDetector;
     private final ClassPathRegistry classPathRegistry;
     private final ActionExecutionSpecFactory actionExecutionSpecFactory;
+    private final ProjectCacheDir projectCacheDir;
+
     private Factory<JavaCompiler> javaHomeBasedJavaCompilerFactory;
     private final Problems problems;
 
@@ -50,6 +53,7 @@ public class DefaultJavaCompilerFactory implements JavaCompilerFactory {
         AnnotationProcessorDetector processorDetector,
         ClassPathRegistry classPathRegistry,
         ActionExecutionSpecFactory actionExecutionSpecFactory,
+        ProjectCacheDir projectCacheDir,
         Problems problems
     ) {
         this.workingDirProvider = workingDirProvider;
@@ -60,6 +64,7 @@ public class DefaultJavaCompilerFactory implements JavaCompilerFactory {
         this.classPathRegistry = classPathRegistry;
         this.actionExecutionSpecFactory = actionExecutionSpecFactory;
         this.problems = problems;
+        this.projectCacheDir = projectCacheDir;
     }
 
     private Factory<JavaCompiler> getJavaHomeBasedJavaCompilerFactory() {
@@ -87,7 +92,7 @@ public class DefaultJavaCompilerFactory implements JavaCompilerFactory {
         }
 
         if (ForkingJavaCompileSpec.class.isAssignableFrom(type)) {
-            return (Compiler<T>) new DaemonJavaCompiler(workingDirProvider.getWorkingDirectory(), JdkJavaCompiler.class, new Object[]{getJavaHomeBasedJavaCompilerFactory()}, new ProcessIsolatedCompilerWorkerExecutor(workerDaemonFactory, actionExecutionSpecFactory), forkOptionsFactory, classPathRegistry);
+            return (Compiler<T>) new DaemonJavaCompiler(workingDirProvider.getWorkingDirectory(), JdkJavaCompiler.class, new Object[]{getJavaHomeBasedJavaCompilerFactory()}, new ProcessIsolatedCompilerWorkerExecutor(workerDaemonFactory, actionExecutionSpecFactory, projectCacheDir), forkOptionsFactory, classPathRegistry);
         } else {
             return (Compiler<T>) new JdkJavaCompiler(getJavaHomeBasedJavaCompilerFactory(), problems);
         }
