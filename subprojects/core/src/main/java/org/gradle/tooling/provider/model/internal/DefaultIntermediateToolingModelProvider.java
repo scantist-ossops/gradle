@@ -45,17 +45,22 @@ public class DefaultIntermediateToolingModelProvider implements IntermediateTool
 
     @Override
     public <T> List<T> getModels(List<Project> targets, Class<T> modelType) {
-        return getModelsImpl(targets, modelType, null);
+        return getModelsImpl(targets, modelType.getName(), modelType, null);
     }
 
     @Override
     public <T> List<T> getModels(List<Project> targets, Class<T> modelType, Object modelBuilderParameter) {
-        return getModelsImpl(targets, modelType, modelBuilderParameter);
+        return getModelsImpl(targets, modelType.getName(), modelType, modelBuilderParameter);
+    }
+
+    @Override
+    public <T> List<T> getModels(List<Project> targets, String modelName, Class<T> modelType, Object modelBuilderParameter) {
+        return getModelsImpl(targets, modelName, modelType, modelBuilderParameter);
     }
 
     @Override
     public <P extends Plugin<Project>> void applyPlugin(List<Project> targets, Class<P> pluginClass) {
-        List<Object> rawModels = getModels(targets, PluginApplyingBuilder.MODEL_NAME, createPluginApplyingParameter(pluginClass));
+        List<Object> rawModels = fetchModels(targets, PluginApplyingBuilder.MODEL_NAME, createPluginApplyingParameter(pluginClass));
         ensureModelTypes(Boolean.class, rawModels);
     }
 
@@ -63,17 +68,16 @@ public class DefaultIntermediateToolingModelProvider implements IntermediateTool
         return () -> pluginClass;
     }
 
-    private <T> List<T> getModelsImpl(List<Project> targets, Class<T> modelType, @Nullable Object modelBuilderParameter) {
+    private <T> List<T> getModelsImpl(List<Project> targets, String modelName, Class<T> modelType, @Nullable Object modelBuilderParameter) {
         if (targets.isEmpty()) {
             return Collections.emptyList();
         }
 
-        String modelName = modelType.getName();
-        List<Object> rawModels = getModels(targets, modelName, modelBuilderParameter);
+        List<Object> rawModels = fetchModels(targets, modelName, modelBuilderParameter);
         return ensureModelTypes(modelType, rawModels);
     }
 
-    private List<Object> getModels(List<Project> targets, String modelName, @Nullable Object modelBuilderParameter) {
+    private List<Object> fetchModels(List<Project> targets, String modelName, @Nullable Object modelBuilderParameter) {
         BuildState buildState = extractSingleBuildState(targets);
         Function<Class<?>, Object> parameterFactory = modelBuilderParameter == null ? null : createParameterFactory(modelBuilderParameter);
         return buildState.withToolingModels(controller -> getModels(controller, targets, modelName, parameterFactory));
