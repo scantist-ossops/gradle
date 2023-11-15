@@ -322,18 +322,18 @@
       </trusted-keys>
    </configuration>
    <components>
-      <component group="android-studio" name="android-studio" version="2022.3.1.18">
-         <artifact name="android-studio-2022.3.1.18.linux.tar.gz">
-            <sha256 value="24215e1324a6ac911810b2cc1afb2d735cf745dfbc06918a42b8d6fbc6bf7433" origin="Verified" reason="Artifact is not signed"/>
+      <component group="android-studio" name="android-studio" version="2023.1.1.25">
+         <artifact name="android-studio-2023.1.1.25.linux.tar.gz">
+            <sha256 value="8cea9300760093c8fdf88af4d532c1b29db4bbbfe204a57c4ff8e864b2130ece" origin="Verified" reason="Artifact is not signed"/>
          </artifact>
-         <artifact name="android-studio-2022.3.1.18.mac.zip">
-            <sha256 value="f6c06282dca0ca9eefe82752c1703f15394aa0fd659a845b75e47a673fbf082f" origin="Verified" reason="Artifact is not signed"/>
+         <artifact name="android-studio-2023.1.1.25.mac.zip">
+            <sha256 value="bc0f0925e7bf8b3dc452afc9f6fd242abdb1bb70c1613d43de253cb15805d7b3" origin="Verified" reason="Artifact is not signed"/>
          </artifact>
-         <artifact name="android-studio-2022.3.1.18.mac_arm.zip">
-            <sha256 value="ae39502b86dcb004b7732a6639edc97a4bd501400118e9d0f3441d5079903cac" origin="Verified" reason="Artifact is not signed"/>
+         <artifact name="android-studio-2023.1.1.25.mac_arm.zip">
+            <sha256 value="cc76fbdd3a0aaade6ea8acac52468208522dc99f7059d5734a42dc43c51bc630" origin="Verified" reason="Artifact is not signed"/>
          </artifact>
-         <artifact name="android-studio-2022.3.1.18.windows.zip">
-            <sha256 value="ce23ee1647d25f4567895b7ab29aaa844ef02d0aecd218ec775f62be564189b3" origin="Verified" reason="Artifact is not signed"/>
+         <artifact name="android-studio-2023.1.1.25.windows.zip">
+            <sha256 value="3b80927a3ad5a35d9715cda71ca172018a5165ae2a03437aa8ca6f4bfb6dd4f5" origin="Verified" reason="Artifact is not signed"/>
          </artifact>
       </component>
       <component group="antlr" name="antlr" version="2.7.7">
