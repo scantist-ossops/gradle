@@ -99,6 +99,8 @@ object Config {
     const val performanceTestResultsJson = "performance-tests/$performanceTestResultsJsonName"
 
     // Android Studio Hedgehog 2023.1.1 RC
+    // Find all references here https://developer.android.com/studio/archive
+    // Update verification-medata.xml
     const val androidStudioVersion = "2023.1.1.25"
     val defaultAndroidStudioJvmArgs = listOf("-Xms256m", "-Xmx4096m")
 }
