@@ -952,4 +952,72 @@ project.extensions.create("some", SomeExtension)
         then:
         outputContains("filter: null")
     }
+
+    def "self-referential property is detected"() {
+        buildFile """
+            abstract class MyTask extends DefaultTask {
+                @Input
+                abstract Property<String> getStringInput()
+
+                @TaskAction
+                def action() {
+                    println("stringInput = \${stringInput.get()}")
+                }
+            }
+
+            tasks.register("myTask", MyTask) {
+                stringInput.convention("defaultValue")
+                stringInput = $selfReference
+            }
+        """
+
+        expect:
+        fails "myTask", "--stacktrace"
+
+        where:
+        selfReference                                 || _
+        "stringInput"                                 || _
+        "stringInput.map { it.capitalize() }"         || _
+        "provider { stringInput.get().capitalize() }" || _
+    }
+
+
+    def "self-referential provider in property is detected"() {
+        buildFile """
+            abstract class MyTask extends DefaultTask {
+                @Input
+                abstract Property<String> getStringInput()
+
+                @TaskAction
+                def action() {
+                    println("stringInput = \${stringInput.get()}")
+                }
+            }
+
+            tasks.register("myTask", MyTask) {
+                def p = provider { "value" }
+                p = p.map { v -> v + p.get()}
+                stringInput = p
+            }
+        """
+
+        expect:
+        fails "myTask", "--stacktrace"
+    }
+
+    def "self-referential provider in standalone property is detected"() {
+        buildFile """
+            tasks.register("myTask") {
+                def prop = objects.property(String)
+                prop.set(prop.map { "newValue" })
+
+                doLast {
+                    println("prop = \${prop.get()}")
+                }
+            }
+        """
+
+        expect:
+        fails "myTask", "--stacktrace"
+    }
 }
