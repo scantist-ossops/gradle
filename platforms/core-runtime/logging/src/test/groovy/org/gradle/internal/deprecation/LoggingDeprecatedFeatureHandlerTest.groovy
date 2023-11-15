@@ -18,7 +18,6 @@ package org.gradle.internal.deprecation
 
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.configuration.WarningMode
-import org.gradle.api.problems.internal.DefaultProblems
 import org.gradle.internal.Describables
 import org.gradle.internal.featurelifecycle.DeprecatedUsageProgressDetails
 import org.gradle.internal.featurelifecycle.LoggingDeprecatedFeatureHandler
@@ -63,7 +62,7 @@ class LoggingDeprecatedFeatureHandlerTest extends Specification {
     def setup() {
         _ * diagnosticsFactory.newStream() >> problemStream
         _ * diagnosticsFactory.newUnlimitedStream() >> problemStream
-        handler.init(diagnosticsFactory, WarningMode.All, progressBroadcaster, new DefaultProblems(Mock(BuildOperationProgressEventEmitter)))
+        handler.init(diagnosticsFactory, WarningMode.All, progressBroadcaster)
     }
 
     def 'logs each deprecation warning only once'() {
@@ -207,7 +206,7 @@ feature1 removal""")
         useStackTrace()
 
         when:
-        handler.init(diagnosticsFactory, type, progressBroadcaster, new DefaultProblems(Mock(BuildOperationProgressEventEmitter)))
+        handler.init(diagnosticsFactory, type, progressBroadcaster)
         handler.featureUsed(deprecatedFeatureUsage('feature1'))
 
         then:

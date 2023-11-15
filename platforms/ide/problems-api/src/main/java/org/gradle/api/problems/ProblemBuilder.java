@@ -18,6 +18,8 @@ package org.gradle.api.problems;
 
 import org.gradle.api.Incubating;
 
+import javax.annotation.Nullable;
+
 /**
  * {@link Problem} instance configurator allowing the specification of all optional fields.
  *
@@ -47,12 +49,12 @@ public interface ProblemBuilder {
     ProblemBuilder details(String details);
 
     /**
-     * The description of how to solve this problem
+     * The description of how to solve this problem.
      *
      * @param solution the solution.
      * @return this
      */
-    ProblemBuilder solution(String solution);
+    ProblemBuilder solution(@Nullable String solution);
 
     /**
      * Specifies arbitrary data associated with this problem.
