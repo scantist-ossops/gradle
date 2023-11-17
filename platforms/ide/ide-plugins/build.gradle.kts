@@ -49,6 +49,7 @@ dependencies {
     implementation(project(":war"))
 
     implementation(libs.commonsLang)
+    implementation(libs.jsr305)
 
     runtimeOnly(project(":language-jvm"))
     runtimeOnly(project(":plugins"))
