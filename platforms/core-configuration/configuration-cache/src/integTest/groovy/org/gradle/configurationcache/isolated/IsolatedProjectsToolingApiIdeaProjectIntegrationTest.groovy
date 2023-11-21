@@ -330,7 +330,7 @@ class IsolatedProjectsToolingApiIdeaProjectIntegrationTest extends AbstractIsola
     }
 
     def "ensures unique name for all Idea modules in composite"() {
-        singleProjectBuildInRootFolder("buildA") {
+        singleProjectBuildInRootDir("buildA") {
             buildFile << """
                 apply plugin: 'java'
                 dependencies {
@@ -347,7 +347,7 @@ class IsolatedProjectsToolingApiIdeaProjectIntegrationTest extends AbstractIsola
             """
         }
 
-        multiProjectBuildInSubFolder("buildB", ['b1', 'b2']) {
+        multiProjectBuildInSubDir("buildB", ['b1', 'b2']) {
             buildFile << """
                 apply plugin: 'java'
             """
@@ -362,13 +362,13 @@ class IsolatedProjectsToolingApiIdeaProjectIntegrationTest extends AbstractIsola
             """
         }
 
-        singleProjectBuildInSubfolder("buildC") {
+        singleProjectBuildInSubDir("buildC") {
             buildFile << """
                 apply plugin: 'java'
             """
         }
 
-        multiProjectBuildInSubFolder("buildD", ["b1", "buildC"]) {
+        multiProjectBuildInSubDir("buildD", ["b1", "buildC"]) {
             buildFile << """
                 apply plugin: 'java'
                 group = 'org.buildD'

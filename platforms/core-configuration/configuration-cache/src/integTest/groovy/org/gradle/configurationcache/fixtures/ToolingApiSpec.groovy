@@ -48,15 +48,15 @@ trait ToolingApiSpec {
         temporaryFolder.testDirectory
     }
 
-    BuildTestFile singleProjectBuildInRootFolder(String projectName, @DelegatesTo(BuildTestFile) Closure cl = {}) {
+    BuildTestFile singleProjectBuildInRootDir(String projectName, @DelegatesTo(BuildTestFile) Closure cl = {}) {
         new BuildTestFixture(projectDir).withBuildInRootDir().singleProjectBuild(projectName, cl)
     }
 
-    BuildTestFile singleProjectBuildInSubfolder(String projectName, @DelegatesTo(BuildTestFile) Closure cl = {}) {
+    BuildTestFile singleProjectBuildInSubDir(String projectName, @DelegatesTo(BuildTestFile) Closure cl = {}) {
         new BuildTestFixture(projectDir).withBuildInSubDir().singleProjectBuild(projectName, cl)
     }
 
-    BuildTestFile multiProjectBuildInSubFolder(String projectName, List<String> subprojects, @DelegatesTo(BuildTestFile) Closure cl = {}) {
+    BuildTestFile multiProjectBuildInSubDir(String projectName, List<String> subprojects, @DelegatesTo(BuildTestFile) Closure cl = {}) {
         new BuildTestFixture(projectDir).withBuildInSubDir().multiProjectBuildWithIsolatedProjects(projectName, subprojects, cl)
     }
 
