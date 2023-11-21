@@ -106,10 +106,10 @@ public class IsolatedProjectsSafeIdeaModelBuilder implements IdeaModelBuilderInt
     }
 
     private void applyIdeaProjectToBuildTree(Project root) {
-        applyIdeaPlugin((ProjectInternal) root, new ArrayList<>());
+        applyIdeaPluginToBuildTree((ProjectInternal) root, new ArrayList<>());
     }
 
-    private void applyIdeaPlugin(ProjectInternal root, List<GradleInternal> alreadyProcessed) {
+    private void applyIdeaPluginToBuildTree(ProjectInternal root, List<GradleInternal> alreadyProcessed) {
         intermediateToolingModelProvider.applyPlugin(new ArrayList<>(root.getAllprojects()), IdeaPlugin.class);
 
         for (IncludedBuildInternal reference : root.getGradle().includedBuilds()) {
@@ -118,7 +118,7 @@ public class IsolatedProjectsSafeIdeaModelBuilder implements IdeaModelBuilderInt
                 GradleInternal build = target.getMutableModel();
                 if (!alreadyProcessed.contains(build)) {
                     alreadyProcessed.add(build);
-                    applyIdeaPlugin(build.getRootProject(), alreadyProcessed);
+                    applyIdeaPluginToBuildTree(build.getRootProject(), alreadyProcessed);
                 }
             }
         }

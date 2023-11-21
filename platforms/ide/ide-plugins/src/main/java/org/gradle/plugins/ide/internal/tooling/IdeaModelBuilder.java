@@ -71,12 +71,12 @@ public class IdeaModelBuilder implements IdeaModelBuilderInternal {
     @Override
     public DefaultIdeaProject buildForRoot(Project project, boolean offlineDependencyResolution) {
         Project root = project.getRootProject();
-        applyIdeaPlugin((ProjectInternal) root, new ArrayList<>());
+        applyIdeaPluginToBuildTree((ProjectInternal) root, new ArrayList<>());
         DefaultGradleProject rootGradleProject = gradleProjectBuilder.buildForRoot(project);
         return build(root, rootGradleProject, offlineDependencyResolution);
     }
 
-    private void applyIdeaPlugin(ProjectInternal root, List<GradleInternal> alreadyProcessed) {
+    private void applyIdeaPluginToBuildTree(ProjectInternal root, List<GradleInternal> alreadyProcessed) {
         Set<Project> allProjects = root.getAllprojects();
         for (Project p : allProjects) {
             p.getPluginManager().apply(IdeaPlugin.class);
@@ -88,7 +88,7 @@ public class IdeaModelBuilder implements IdeaModelBuilderInternal {
                 GradleInternal build = target.getMutableModel();
                 if (!alreadyProcessed.contains(build)) {
                     alreadyProcessed.add(build);
-                    applyIdeaPlugin(build.getRootProject(), alreadyProcessed);
+                    applyIdeaPluginToBuildTree(build.getRootProject(), alreadyProcessed);
                 }
             }
         }
