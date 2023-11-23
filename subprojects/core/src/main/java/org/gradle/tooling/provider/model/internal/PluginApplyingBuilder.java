@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.gradle.plugins.ide.internal.tooling;
+package org.gradle.tooling.provider.model.internal;
 
 import org.gradle.api.NonNullApi;
 import org.gradle.api.Project;

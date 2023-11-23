@@ -32,6 +32,7 @@ import org.gradle.tooling.provider.model.ToolingModelBuilderRegistry;
 import org.gradle.tooling.provider.model.internal.BuildScopeToolingModelBuilderRegistryAction;
 import org.gradle.tooling.provider.model.internal.DefaultIntermediateToolingModelProvider;
 import org.gradle.tooling.provider.model.internal.IntermediateToolingModelProvider;
+import org.gradle.tooling.provider.model.internal.PluginApplyingBuilder;
 
 public class ToolingModelServices extends AbstractPluginServiceRegistry {
     @Override
