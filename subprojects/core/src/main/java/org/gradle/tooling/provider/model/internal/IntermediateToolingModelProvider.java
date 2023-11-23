@@ -56,7 +56,6 @@ public interface IntermediateToolingModelProvider {
     /**
      * Applies a plugin of a given type to the given projects.
      */
-    // TODO: how would this work with caching?
     <P extends Plugin<Project>> void applyPlugin(List<Project> targets, Class<P> pluginClass);
 
 }

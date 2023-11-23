@@ -439,6 +439,8 @@ class IsolatedProjectsToolingApiIdeaProjectIntegrationTest extends AbstractIsola
         ])
     }
 
+    // TODO: add a step that changes on project (that gets incrementally reconfigured) and re-fetch the model
+
     private static void checkIdeaProject(IdeaProject actual, IdeaProject expected) {
         checkModel(actual, expected, [
             { it.parent },
