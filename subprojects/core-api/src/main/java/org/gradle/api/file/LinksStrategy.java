@@ -90,7 +90,7 @@ public interface LinksStrategy extends Serializable {
         @Override
         public boolean shouldBePreserved(@Nullable SymbolicLinkDetails linkDetails, String originalPath) {
             if (linkDetails != null) {
-                throw new GradleException(String.format("Links strategy is set to %s, but a symlink was visited: %s pointing to %s.", this, pathHint(originalPath), linkDetails.getTarget()));
+                throw new GradleException(String.format("Links strategy is set to %s, but a symlink was visited: '%s' pointing to '%s'.", this, pathHint(originalPath), linkDetails.getTarget()));
             }
             return false;
         }

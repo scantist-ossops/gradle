@@ -89,7 +89,7 @@ class PathVisitor implements java.nio.file.FileVisitor<Path> {
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
         FileVisitDetails details = getFileVisitDetails(file, attrs);
         if (shouldVisit(details)) {
-            linksStrategy.maybeThrowOnBrokenLink(details.getSymbolicLinkDetails(), file.toString());
+            linksStrategy.maybeThrowOnBrokenLink(details.getSymbolicLinkDetails(), details.getRelativePath().toString());
             visitor.visitFile(details);
         }
         return checkStopFlag();
