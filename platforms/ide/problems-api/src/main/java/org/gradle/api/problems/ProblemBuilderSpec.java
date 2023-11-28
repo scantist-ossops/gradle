@@ -24,10 +24,8 @@ import org.gradle.api.Incubating;
  * Usage example:
  *
  * <pre>
- * throw getProblemService().throwing(builder -&gt;
+ * throw getProblemService().forNamespace("org.example.plugin").throwing(builder -&gt;
  *        builder.label(message)
- *            .undocumented()
- *            .noLocation()
  *            .type("task_selection")
  *            .details("long message")
  *            .severity(Severity.ERROR)
@@ -41,5 +39,12 @@ import org.gradle.api.Incubating;
 @Incubating
 public interface ProblemBuilderSpec {
 
-    ProblemBuilder apply(ProblemBuilderDefiningLabel builder);
+    /**
+     * Spec method.
+     *
+     * @param builder The target builder to configure.
+     * @return The builder.
+     * @since 8.6
+     */
+    ProblemBuilder apply(ProblemBuilder builder);
 }

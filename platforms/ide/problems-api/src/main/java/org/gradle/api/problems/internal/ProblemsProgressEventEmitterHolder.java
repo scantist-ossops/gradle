@@ -16,7 +16,6 @@
 
 package org.gradle.api.problems.internal;
 
-import org.gradle.api.problems.ProblemTransformer;
 import org.gradle.api.problems.Problems;
 import org.gradle.api.problems.internal.emitters.NoOpProblemEmitter;
 import org.gradle.internal.operations.NoOpBuildOperationProgressEventEmitter;

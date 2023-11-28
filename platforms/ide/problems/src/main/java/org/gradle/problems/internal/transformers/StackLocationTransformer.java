@@ -17,7 +17,7 @@
 package org.gradle.problems.internal.transformers;
 
 import org.gradle.api.problems.Problem;
-import org.gradle.api.problems.ProblemTransformer;
+import org.gradle.api.problems.internal.ProblemTransformer;
 import org.gradle.problems.Location;
 import org.gradle.problems.ProblemDiagnostics;
 import org.gradle.problems.buildtree.ProblemStream;

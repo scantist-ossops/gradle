@@ -97,29 +97,9 @@ class ProblemProgressEventCrossVersionTest extends ToolingApiSpecification {
     def "Problems expose details via Tooling API events"() {
         given:
         buildFile << """
-            import org.gradle.api.problems.Problem
+            import org.gradle.api.problems.Problems
             import org.gradle.api.problems.Severity
             import org.gradle.internal.deprecation.Documentation
-
-
-            class TestDocLink implements DocLink {
-
-                private final String url;
-
-                public TestDocLink(String url) {
-                    this.url = url
-                }
-
-                @Override
-                String getUrl() {
-                    return url;
-                }
-
-                @Override
-                String getConsultDocumentationMessage() {
-                    return "consult " + url;
-                }
-            }
 
             abstract class ProblemReportingTask extends DefaultTask {
                 @Inject
@@ -127,7 +107,7 @@ class ProblemProgressEventCrossVersionTest extends ToolingApiSpecification {
 
                 @TaskAction
                 void run() {
-                    problems.create {
+                    getProblems().forNamespace("org.example.plugin").create {
                         it.label("shortProblemMessage")
                         $documentationConfig
                         .fileLocation("/tmp/foo", 1, 2, 3)
@@ -154,7 +134,7 @@ class ProblemProgressEventCrossVersionTest extends ToolingApiSpecification {
 
         then:
         problems.size() == 1
-        problems[0].category.namespace == 'main' // TODO this is a bug; see https://github.com/gradle/gradle/issues/27123
+        problems[0].category.namespace == 'gradle-plugin:org.example.plugin'
         problems[0].category.category == 'main'
         problems[0].category.subCategories == ['sub','id']
         problems[0].additionalData.asMap == ['aKey' : 'aValue']
@@ -169,15 +149,15 @@ class ProblemProgressEventCrossVersionTest extends ToolingApiSpecification {
         (problems[0].locations[0] as FileLocation).length == 3
         problems[0].locations[1] instanceof TaskPathLocation
         (problems[0].locations[1] as TaskPathLocation).identityPath == ':reportProblem'
-        problems[0].documentationLink.url == expecteDocumentation // TODO https://github.com/gradle/gradle/issues/27124
+        problems[0].documentationLink.url == expecteDocumentation
         problems[0].solutions.size() == 1
         problems[0].solutions[0].solution == 'try this instead'
         problems[0].exception.exception == null
 
         where:
-        detailsConfig              | expectedDetails | documentationConfig                                          | expecteDocumentation
-        '.details("long message")' | "long message"  | '.documentedAt(new TestDocLink("https://docs.example.org"))' | 'https://docs.example.org'
-        ''                         | null            | '.undocumented()'                                            | null
+        detailsConfig              | expectedDetails | documentationConfig                         | expecteDocumentation
+        '.details("long message")' | "long message"  | '.documentedAt("https://docs.example.org")' | 'https://docs.example.org'
+        ''                         | null            | ''                                          | null
     }
 
     class ProblemProgressListener implements ProgressListener {

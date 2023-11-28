@@ -18,30 +18,103 @@ package org.gradle.api.problems;
 
 import org.gradle.api.Incubating;
 
+import javax.annotation.Nullable;
+
 /**
- * {@link Problem} instance builder allowing the specification of all optional fields.
- *
- * This is the last interface in the builder chain. The order of steps can be traced from the {@link Problems} service interface.
+ * {@link Problem} instance configurator that is capable of creating new Problem instances.
  *
  * An example of how to use the builder:
  * <pre>{@code
- *  <problemService>.createProblemBuilder()
+ *  <problemReporter>.createProblemBuilder()
  *          .label("test problem")
  *          .undocumented()
- *          .noLocation()
- *          .category("problemCategory")
+ *          .category("category", "subcategory")
  *          .severity(Severity.ERROR)
  *          .details("this is a test")
+ *          .build()
  *  }</pre>
  *
  * @since 8.6
  */
 @Incubating
 public interface BasicProblemBuilder extends ProblemBuilder {
+
     /**
-     * Creates the new problem. Calling {@link #build()} won't report the problem via build operations, it can be done separately by calling {@link ReportableProblem#report()}.
+     * Creates the new problem. Calling this method won't report the problem via build operations, it can be done separately by calling {@link ProblemReporter#report(Problem)}.
      *
      * @return the new problem
      */
     Problem build();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder label(String label, Object... args);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder category(String category, String... details);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder documentedAt(DocLink doc);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder documentedAt(String url);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder fileLocation(String path, @Nullable Integer line, @Nullable Integer column, @Nullable Integer length);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder pluginLocation(String pluginId);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder stackLocation();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder details(String details);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder solution(String solution);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder additionalData(String key, Object value);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder withException(RuntimeException e);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    BasicProblemBuilder severity(Severity severity);
 }

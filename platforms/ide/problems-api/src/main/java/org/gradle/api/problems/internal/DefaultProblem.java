@@ -19,11 +19,11 @@ package org.gradle.api.problems.internal;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.gradle.api.NonNullApi;
+import org.gradle.api.problems.BasicProblemBuilder;
 import org.gradle.api.problems.DocLink;
 import org.gradle.api.problems.Problem;
 import org.gradle.api.problems.ProblemCategory;
 import org.gradle.api.problems.Severity;
-import org.gradle.api.problems.UnboundBasicProblemBuilder;
 import org.gradle.api.problems.locations.ProblemLocation;
 import org.gradle.internal.operations.OperationIdentifier;
 
@@ -42,7 +42,7 @@ public class DefaultProblem implements Problem, Serializable {
     private final String description;
     private final List<String> solutions;
     private final RuntimeException cause;
-    private final String problemCategory;
+    private final ProblemCategory problemCategory;
     private final Map<String, Object> additionalData;
 
     @Nullable
@@ -56,7 +56,7 @@ public class DefaultProblem implements Problem, Serializable {
         @Nullable String description,
         @Nullable List<String> solutions,
         @Nullable RuntimeException cause,
-        String problemCategory,
+        ProblemCategory problemCategory,
         Map<String, Object> additionalData,
         @Nullable OperationIdentifier buildOperationId
     ) {
@@ -110,7 +110,7 @@ public class DefaultProblem implements Problem, Serializable {
 
     @Override
     public ProblemCategory getProblemCategory() {
-        return new DefaultProblemCategory(problemCategory);
+        return problemCategory;
     }
 
     @Override
@@ -132,7 +132,7 @@ public class DefaultProblem implements Problem, Serializable {
     }
 
     @Override
-    public UnboundBasicProblemBuilder toBuilder() {
+    public BasicProblemBuilder toBuilder() {
         return new DefaultBasicProblemBuilder(this);
     }
 

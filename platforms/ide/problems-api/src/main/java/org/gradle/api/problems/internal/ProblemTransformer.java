@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-package org.gradle.api.problems;
+package org.gradle.api.problems.internal;
 
 import org.gradle.api.Incubating;
+import org.gradle.api.problems.Problem;
+import org.gradle.api.problems.Problems;
 
 /**
  * Describes a transformation that can be applied to a problem.
  * <p>
  * These transformers could be added to the {@link Problems} service to transform problems before they are reported.
  *
- * @since 8.5
+ * @since 8.6
  */
 @Incubating
 public interface ProblemTransformer {
@@ -35,8 +37,6 @@ public interface ProblemTransformer {
      *
      * @param problem the problem to transform
      * @return the transformed problem
-     *
-     * @since 8.5
      */
     Problem transform(Problem problem);
 

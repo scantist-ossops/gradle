@@ -42,10 +42,8 @@ class InjectedProblemTransformerIntegrationTest extends AbstractIntegrationSpec 
 
                 @TaskAction
                 void run() {
-                    problems.create {
+                    problems.forCoreNamespace().create {
                         it.label("label")
-                        .undocumented()
-                        .noLocation()
                         .category("type")
                     }.report()
                 }
@@ -88,11 +86,9 @@ class InjectedProblemTransformerIntegrationTest extends AbstractIntegrationSpec 
                 protected abstract Problems getProblems();
 
                 public void apply(Project project) {
-                    getProblems().create(builder ->
+                    getProblems().forNamespace("org.example.plugin").create(builder ->
                         builder
                             .label("label")
-                            .undocumented()
-                            .noLocation()
                             .category("type")
                     ).report();
                     project.getTasks().register("reportProblem", t -> {

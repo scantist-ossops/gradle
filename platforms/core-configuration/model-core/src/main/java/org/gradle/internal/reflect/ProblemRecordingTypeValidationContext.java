@@ -17,7 +17,8 @@
 package org.gradle.internal.reflect;
 
 import org.gradle.api.Action;
-import org.gradle.api.problems.ReportableProblem;
+import org.gradle.api.problems.Problem;
+import org.gradle.api.problems.internal.InternalProblemReporter;
 import org.gradle.api.problems.internal.InternalProblems;
 import org.gradle.api.problems.internal.ProblemsProgressEventEmitterHolder;
 import org.gradle.internal.reflect.validation.DefaultTypeAwareProblemBuilder;
@@ -45,10 +46,11 @@ abstract public class ProblemRecordingTypeValidationContext implements TypeValid
 
     @Override
     public void visitTypeProblem(Action<? super TypeAwareProblemBuilder> problemSpec) {
-        InternalProblems problems = (InternalProblems) ProblemsProgressEventEmitterHolder.get();
+        InternalProblems internalProblems = (InternalProblems) ProblemsProgressEventEmitterHolder.get();
+        InternalProblemReporter problems = internalProblems.forCoreNamespace();
         DefaultTypeAwareProblemBuilder problemBuilder = new DefaultTypeAwareProblemBuilder(problems.createProblemBuilder());
         problemSpec.execute(problemBuilder);
-        recordProblem(problemBuilder.build());
+        recordProblem(internalProblems, problemBuilder.build());
     }
 
     private Optional<PluginId> pluginId() {
@@ -58,15 +60,18 @@ abstract public class ProblemRecordingTypeValidationContext implements TypeValid
 
     @Override
     public void visitPropertyProblem(Action<? super TypeAwareProblemBuilder> problemSpec) {
-        InternalProblems problems = (InternalProblems) ProblemsProgressEventEmitterHolder.get();
-        DefaultTypeAwareProblemBuilder problemBuilder = new DefaultTypeAwareProblemBuilder(problems.createProblemBuilder());
+        InternalProblems internalProblems = (InternalProblems) ProblemsProgressEventEmitterHolder.get();
+        InternalProblemReporter reporter = internalProblems.forCoreNamespace();
+        DefaultTypeAwareProblemBuilder problemBuilder = new DefaultTypeAwareProblemBuilder(reporter.createProblemBuilder());
         problemSpec.execute(problemBuilder);
         problemBuilder.withAnnotationType(rootType);
         pluginId()
             .map(PluginId::getId)
             .ifPresent(id -> problemBuilder.additionalData(PLUGIN_ID, id));
-        recordProblem(problemBuilder.build());
+        recordProblem(internalProblems, problemBuilder.build());
     }
 
-    abstract protected void recordProblem(ReportableProblem problem);
+    // TODO internalProblems should be injected only once
+    // TODO maybe report() should be exposed on Problems and not on ProblemReporter
+    abstract protected void recordProblem(InternalProblems internalProblems, Problem problem);
 }

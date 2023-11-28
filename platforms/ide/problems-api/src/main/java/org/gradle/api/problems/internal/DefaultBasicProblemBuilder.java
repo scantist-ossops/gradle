@@ -16,10 +16,11 @@
 
 package org.gradle.api.problems.internal;
 
+import org.gradle.api.problems.BasicProblemBuilder;
 import org.gradle.api.problems.DocLink;
 import org.gradle.api.problems.Problem;
+import org.gradle.api.problems.ProblemCategory;
 import org.gradle.api.problems.Severity;
-import org.gradle.api.problems.UnboundBasicProblemBuilder;
 import org.gradle.api.problems.locations.FileLocation;
 import org.gradle.api.problems.locations.PluginIdLocation;
 import org.gradle.api.problems.locations.ProblemLocation;
@@ -35,15 +36,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DefaultBasicProblemBuilder implements UnboundBasicProblemBuilder {
+public class DefaultBasicProblemBuilder implements BasicProblemBuilder {
 
+    private final String namespace;
     private String label;
-    private String problemCategory;
+    private ProblemCategory problemCategory;
     private Severity severity;
     private List<ProblemLocation> locations;
     private String details;
     private DocLink docLink;
-    private boolean explicitlyUndocumented;
     private List<String> solutions;
     private RuntimeException exception;
     private final Map<String, Object> additionalData;
@@ -52,12 +53,11 @@ public class DefaultBasicProblemBuilder implements UnboundBasicProblemBuilder {
 
     public DefaultBasicProblemBuilder(Problem problem) {
         this.label = problem.getLabel();
-        this.problemCategory = problem.getProblemCategory().toString();
+        this.problemCategory = problem.getProblemCategory();
         this.severity = problem.getSeverity();
         this.locations = new ArrayList<ProblemLocation>(problem.getLocations());
         this.details = problem.getDetails();
         this.docLink = problem.getDocumentationLink();
-        this.explicitlyUndocumented = problem.getDocumentationLink() == null;
         this.solutions = new ArrayList<String>(problem.getSolutions());
         this.exception = problem.getException();
         this.additionalData = new HashMap<String, Object>(problem.getAdditionalData());
@@ -65,9 +65,11 @@ public class DefaultBasicProblemBuilder implements UnboundBasicProblemBuilder {
         if (problem instanceof DefaultProblem) {
             this.currentOperationId = ((DefaultProblem) problem).getBuildOperationId();
         }
+        this.namespace = problem.getProblemCategory().getNamespace();
     }
 
-    public DefaultBasicProblemBuilder() {
+    public DefaultBasicProblemBuilder(String namespace) {
+        this.namespace = namespace;
         this.locations = new ArrayList<ProblemLocation>();
         this.additionalData = new HashMap<String, Object>();
     }
@@ -122,79 +124,77 @@ public class DefaultBasicProblemBuilder implements UnboundBasicProblemBuilder {
         return this.severity;
     }
 
-    public UnboundBasicProblemBuilder label(String label, Object... args) {
+    @Override
+    public BasicProblemBuilder label(String label, Object... args) {
         this.label = String.format(label, args);
         return this;
     }
 
     @Override
-    public UnboundBasicProblemBuilder severity(Severity severity) {
+    public BasicProblemBuilder severity(Severity severity) {
         this.severity = severity;
         return this;
     }
 
-    public UnboundBasicProblemBuilder taskPathLocation(Path taskPath) {
+    public BasicProblemBuilder taskPathLocation(Path taskPath) {
         this.getLocations().add(new TaskPathLocation(taskPath));
         return this;
     }
 
-    public UnboundBasicProblemBuilder location(String path, @javax.annotation.Nullable Integer line) {
+    public BasicProblemBuilder location(String path, @javax.annotation.Nullable Integer line) {
         location(path, line, null);
         return this;
     }
 
-    public UnboundBasicProblemBuilder location(String path, @javax.annotation.Nullable Integer line, @javax.annotation.Nullable Integer column) {
+    public BasicProblemBuilder location(String path, @javax.annotation.Nullable Integer line, @javax.annotation.Nullable Integer column) {
         this.getLocations().add(new FileLocation(path, line, column, 0));
         return this;
     }
 
-    public UnboundBasicProblemBuilder fileLocation(String path, @javax.annotation.Nullable Integer line, @javax.annotation.Nullable Integer column, @javax.annotation.Nullable Integer length) {
+    @Override
+    public BasicProblemBuilder fileLocation(String path, @javax.annotation.Nullable Integer line, @javax.annotation.Nullable Integer column, @javax.annotation.Nullable Integer length) {
         this.getLocations().add(new FileLocation(path, line, column, length));
         return this;
     }
 
     @Override
-    public UnboundBasicProblemBuilder pluginLocation(String pluginId) {
+    public BasicProblemBuilder pluginLocation(String pluginId) {
         this.getLocations().add(new PluginIdLocation(pluginId));
         return this;
     }
 
     @Override
-    public UnboundBasicProblemBuilder stackLocation() {
+    public BasicProblemBuilder stackLocation() {
         this.collectLocation = true;
         return this;
     }
 
     @Override
-    public UnboundBasicProblemBuilder noLocation() {
-        return this;
-    }
-
-    public UnboundBasicProblemBuilder details(String details) {
+    public BasicProblemBuilder details(String details) {
         this.details = details;
         return this;
     }
 
-    public UnboundBasicProblemBuilder documentedAt(DocLink doc) {
-        this.explicitlyUndocumented = false;
+    @Override
+    public BasicProblemBuilder documentedAt(DocLink doc) {
         this.docLink = doc;
         return this;
     }
 
     @Override
-    public UnboundBasicProblemBuilder undocumented() {
-        this.explicitlyUndocumented = true;
-        this.docLink = null;
+    public BasicProblemBuilder documentedAt(String url) {
+        this.docLink = new DefaultDocLink(url);
         return this;
     }
 
     @Override
-    public UnboundBasicProblemBuilder category(String category, String... details){
-        this.problemCategory = DefaultProblemCategory.category(category, details).toString();
+    public BasicProblemBuilder category(String category, String... details){
+        this.problemCategory = DefaultProblemCategory.create(namespace, category, details);
         return this;
     }
 
-    public UnboundBasicProblemBuilder solution(@Nullable String solution) {
+    @Override
+    public BasicProblemBuilder solution(@Nullable String solution) {
         if (this.getSolutions() == null) {
             this.solutions = new ArrayList<String>();
         }
@@ -202,7 +202,8 @@ public class DefaultBasicProblemBuilder implements UnboundBasicProblemBuilder {
         return this;
     }
 
-    public UnboundBasicProblemBuilder additionalData(String key, Object value) {
+    @Override
+    public BasicProblemBuilder additionalData(String key, Object value) {
         validateAdditionalDataValueType(value);
         this.getAdditionalData().put(key, value);
         return this;
@@ -215,7 +216,7 @@ public class DefaultBasicProblemBuilder implements UnboundBasicProblemBuilder {
     }
 
     @Override
-    public UnboundBasicProblemBuilder withException(RuntimeException e) {
+    public BasicProblemBuilder withException(RuntimeException e) {
         this.exception = e;
         return this;
     }
@@ -229,7 +230,7 @@ public class DefaultBasicProblemBuilder implements UnboundBasicProblemBuilder {
         return label;
     }
 
-    protected String getProblemCategory() {
+    protected ProblemCategory getProblemCategory() {
         return problemCategory;
     }
 
@@ -243,10 +244,6 @@ public class DefaultBasicProblemBuilder implements UnboundBasicProblemBuilder {
 
     protected DocLink getDocLink() {
         return docLink;
-    }
-
-    protected boolean isExplicitlyUndocumented() {
-        return explicitlyUndocumented;
     }
 
     protected List<String> getSolutions() {

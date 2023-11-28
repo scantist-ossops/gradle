@@ -29,10 +29,10 @@ import org.gradle.api.internal.artifacts.dsl.CapabilityNotationParser;
 import org.gradle.api.internal.attributes.ImmutableAttributesFactory;
 import org.gradle.api.internal.catalog.problems.VersionCatalogProblemId;
 import org.gradle.api.model.ObjectFactory;
+import org.gradle.api.problems.Problem;
 import org.gradle.api.problems.ProblemBuilder;
-import org.gradle.api.problems.ProblemBuilderDefiningLabel;
 import org.gradle.api.problems.Problems;
-import org.gradle.api.problems.ReportableProblem;
+import org.gradle.api.problems.internal.InternalProblems;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.provider.ProviderFactory;
 import org.gradle.internal.deprecation.DeprecationLogger;
@@ -68,7 +68,7 @@ public class LibrariesSourceGenerator extends AbstractSourceGenerator {
     private static final int MAX_ENTRIES = 30000;
     public static final String ERROR_HEADER = "Cannot generate dependency accessors";
     private final DefaultVersionCatalog config;
-    private final Problems problemService;
+    private final InternalProblems problemService;
 
     private final Map<String, Integer> classNameCounter = new HashMap<>();
     private final Map<ClassNode, String> classNameCache = new HashMap<>();
@@ -80,7 +80,7 @@ public class LibrariesSourceGenerator extends AbstractSourceGenerator {
     ) {
         super(writer);
         this.config = config;
-        this.problemService = problemService;
+        this.problemService = (InternalProblems) problemService;
     }
 
     public static void generateSource(
@@ -503,13 +503,13 @@ public class LibrariesSourceGenerator extends AbstractSourceGenerator {
     }
 
     private void performValidation(List<String> libraries, List<String> bundles, List<String> versions, List<String> plugins) {
-        assertUnique(libraries, "library aliases", "");
-        assertUnique(bundles, "dependency bundles", "Bundle");
-        assertUnique(versions, "dependency versions", "Version");
-        assertUnique(plugins, "plugins", "Plugin");
+        assertUnique(problemService, libraries, "library aliases", "");
+        assertUnique(problemService, bundles, "dependency bundles", "Bundle");
+        assertUnique(problemService, versions, "dependency versions", "Version");
+        assertUnique(problemService, plugins, "plugins", "Plugin");
         int size = libraries.size() + bundles.size() + versions.size() + plugins.size();
         if (size > MAX_ENTRIES) {
-            throw throwVersionCatalogProblemException(problemService.create(builder ->
+            throw throwVersionCatalogProblemException(problemService.forCoreNamespace().create(builder ->
                 configureVersionCatalogError(builder, getProblemPrefix() + "version catalog model contains too many entries (" + size + ").", TOO_MANY_ENTRIES)
                     .details("The maximum number of aliases in a catalog is " + MAX_ENTRIES)
                     .solution("Reduce the number of aliases defined in this catalog")
@@ -517,35 +517,34 @@ public class LibrariesSourceGenerator extends AbstractSourceGenerator {
         }
     }
 
-    private RuntimeException throwVersionCatalogProblemException(ReportableProblem problem) {
-        throw throwErrorWithNewProblemsApi(ERROR_HEADER, ImmutableList.of(problem));
+    private RuntimeException throwVersionCatalogProblemException(Problem problem) {
+        throw throwErrorWithNewProblemsApi(problemService, ERROR_HEADER, ImmutableList.of(problem));
     }
 
     @Nonnull
-    private static ProblemBuilder configureVersionCatalogError(ProblemBuilderDefiningLabel builder, String message, VersionCatalogProblemId catalogProblemId) {
+    private static ProblemBuilder configureVersionCatalogError(ProblemBuilder builder, String message, VersionCatalogProblemId catalogProblemId) {
         return builder
             .label(message)
             .documentedAt(userManual(VERSION_CATALOG_PROBLEMS, catalogProblemId.name().toLowerCase()))
-            .noLocation()
             .category("dependency-version-catalog", TextUtil.screamingSnakeToKebabCase(catalogProblemId.name()))
             .severity(ERROR);
     }
 
-    private void assertUnique(List<String> names, String prefix, String suffix) {
-        List<ReportableProblem> errors = names.stream()
+    private void assertUnique(InternalProblems problemService, List<String> names, String prefix, String suffix) {
+        List<Problem> errors = names.stream()
             .collect(groupingBy(AbstractSourceGenerator::toJavaName))
             .entrySet()
             .stream()
             .filter(e -> e.getValue().size() > 1)
             .map(e -> {
                 String errorValues = e.getValue().stream().sorted().collect(oxfordJoin("and"));
-                return problemService.create(builder ->
+                return this.problemService.forCoreNamespace().create(builder ->
                     configureVersionCatalogError(builder, getProblemPrefix() + prefix + " " + errorValues + " are mapped to the same accessor name get" + e.getKey() + suffix + "().", ACCESSOR_NAME_CLASH)
                         .details("A name clash was detected")
                         .solution("Use a different alias for " + errorValues));
             })
             .collect(toList());
-        maybeThrowError(ERROR_HEADER, errors);
+        maybeThrowError(problemService, ERROR_HEADER, errors);
     }
 
     @Nonnull

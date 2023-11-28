@@ -16,12 +16,8 @@
 
 package org.gradle.api.problems.internal;
 
-import org.gradle.api.problems.Problem;
-import org.gradle.api.problems.ProblemBuilder;
-import org.gradle.api.problems.ProblemBuilderSpec;
 import org.gradle.api.problems.ProblemEmitter;
-import org.gradle.api.problems.ProblemTransformer;
-import org.gradle.api.problems.ReportableProblem;
+import org.gradle.api.problems.ProblemReporter;
 import org.gradle.internal.service.scopes.Scopes;
 import org.gradle.internal.service.scopes.ServiceScope;
 
@@ -38,8 +34,7 @@ public class DefaultProblems implements InternalProblems {
         this(emitter, Collections.<ProblemTransformer>emptyList());
     }
 
-    public DefaultProblems(ProblemEmitter emitter, List<ProblemTransformer> transformers
-    ) {
+    public DefaultProblems(ProblemEmitter emitter, List<ProblemTransformer> transformers) {
         this.emitter = emitter;
         this.transformers = transformers;
     }
@@ -49,45 +44,15 @@ public class DefaultProblems implements InternalProblems {
     }
 
     @Override
-    public DefaultReportableProblemBuilder createProblemBuilder() {
-        return new DefaultReportableProblemBuilder(this);
-    }
-
-    @Override
-    public RuntimeException throwing(ProblemBuilderSpec action) {
-        DefaultReportableProblemBuilder defaultProblemBuilder = createProblemBuilder();
-        action.apply(defaultProblemBuilder);
-        ReportableProblem problem = defaultProblemBuilder.build();
-        throw throwError(problem.getException(), problem);
-    }
-
-    @Override
-    public RuntimeException rethrowing(RuntimeException e, ProblemBuilderSpec action) {
-        DefaultReportableProblemBuilder defaultProblemBuilder = createProblemBuilder();
-        ProblemBuilder problemBuilder = action.apply(defaultProblemBuilder);
-        problemBuilder.withException(e);
-        throw throwError(e, defaultProblemBuilder.build());
-    }
-
-    @Override
-    public ReportableProblem create(ProblemBuilderSpec action) {
-        DefaultReportableProblemBuilder defaultProblemBuilder = createProblemBuilder();
-        action.apply(defaultProblemBuilder);
-        return defaultProblemBuilder.build();
-    }
-
-    public RuntimeException throwError(RuntimeException exception, Problem problem) {
-        report(problem);
-        throw exception;
-    }
-
-    @Override
-    public void report(Problem problem) {
-        // Transform the problem with all registered transformers
-        for (ProblemTransformer transformer : transformers) {
-            problem = transformer.transform(problem);
+    public ProblemReporter forNamespace(String namespace) {
+        if (namespace.equals(DefaultProblemCategory.getCoreNamespace())) {
+            throw new RuntimeException("Cannot use '" + DefaultProblemCategory.getCoreNamespace() + "' as namespace");
         }
+        return new DefaultProblemReporter(emitter, transformers, DefaultProblemCategory.getPluginNamespace(namespace));
+    }
 
-        emitter.emit(problem);
+    @Override
+    public InternalProblemReporter forCoreNamespace() {
+        return new DefaultProblemReporter(emitter, transformers, DefaultProblemCategory.getCoreNamespace());
     }
 }

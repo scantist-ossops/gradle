@@ -14,35 +14,25 @@
  * limitations under the License.
  */
 
-package org.gradle.api.problems;
+package org.gradle.api.problems.internal;
 
-import org.gradle.api.Incubating;
+import org.gradle.api.problems.BasicProblemBuilder;
+import org.gradle.api.problems.Problem;
+import org.gradle.api.problems.ProblemReporter;
 import org.gradle.internal.service.scopes.Scopes;
 import org.gradle.internal.service.scopes.ServiceScope;
 
-/**
- * Problems API service.
- * <p>
- * The main purpose of this API is to allow clients to create configure and report problems in a centralized way.
- * <p>
- * Reported problems are exposed via build operation progress events, which then be converted to Tooling API progress events.
- *
- * @since 8.4
- */
-@Incubating
 @ServiceScope(Scopes.BuildTree.class)
-public interface Problems {
+public interface InternalProblemReporter extends ProblemReporter {
 
     /**
-     * Return a problem reporter for a particular namespace.
+     * Returns a new problem builder which can configure and create Problem instances.
      * <p>
-     * A namespace isolates similar problem reports from different origins.
-     * <p>
-     * The recommendation is to use the plugin ID as the namespace.
+     * Once all mandatory fields are set, the returned type will allow clients to call {@link BasicProblemBuilder#build()} to create a new Problem instance.
+     * The {@link BasicProblemBuilder#build()} method doesn't have any side effects, it just creates a new instance. Problems should be reported separately with {@link ProblemReporter#report(Problem)}.
      *
-     * @return The problem reporter.
-     * @see ProblemCategory#getNamespace()
-     * @since 8.6
+     * @return a new problem builder
      */
-    ProblemReporter forNamespace(String namespace);
+    BasicProblemBuilder createProblemBuilder();
+
 }
