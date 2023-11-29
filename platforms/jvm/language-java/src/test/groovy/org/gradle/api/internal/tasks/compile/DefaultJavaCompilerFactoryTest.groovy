@@ -17,6 +17,7 @@ package org.gradle.api.internal.tasks.compile
 
 import org.gradle.api.internal.ClassPathRegistry
 import org.gradle.api.internal.tasks.compile.processing.AnnotationProcessorDetector
+import org.gradle.initialization.layout.BuildLayout
 import org.gradle.initialization.layout.ProjectCacheDir
 import org.gradle.api.problems.Problems
 import org.gradle.process.internal.ExecHandleFactory
