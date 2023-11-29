@@ -20,7 +20,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.gradle.api.GradleException;
 import org.gradle.api.InvalidUserDataException;
-import org.gradle.api.UncheckedIOException;
 import org.gradle.api.file.FilePermissions;
 import org.gradle.api.file.FileVisitor;
 import org.gradle.api.file.LinksStrategy;
@@ -43,7 +42,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -119,7 +117,7 @@ public class TarFileTree extends AbstractArchiveFileTree {
         while (!stopFlag.get() && (entry = (TarArchiveEntry) tar.getNextEntry()) != null) {
             SymbolicLinkDetails linkDetails = null;
             if (entry.isSymbolicLink()) {
-                linkDetails = new SymbolicLinkDetailsImpl(tar);
+                linkDetails = new SymbolicLinkDetailsImpl(entry.getLinkName());
             }
             boolean preserveLink = linksStrategy.shouldBePreserved(linkDetails, entry.getName());
             DetailsImpl details = new DetailsImpl(resource, expandedDir, entry, tar, stopFlag, chmod, linkDetails, preserveLink);
@@ -275,33 +273,25 @@ public class TarFileTree extends AbstractArchiveFileTree {
     }
 
     private static final class SymbolicLinkDetailsImpl implements SymbolicLinkDetails {
-        private String target;
-        private final DetailsImpl.NoCloseTarArchiveInputStream tar;
+        private final String target;
 
-        SymbolicLinkDetailsImpl(DetailsImpl.NoCloseTarArchiveInputStream tar) {
-            this.tar = tar;
+        SymbolicLinkDetailsImpl(String linkTarget) {
+            this.target = linkTarget;
         }
 
         @Override
         public boolean isRelative() {
-            return !getTarget().startsWith("/"); //FIXME: check properly
+            return !target.startsWith("/"); //FIXME: check properly
         }
 
         @Override
         public String getTarget() {
-            if (target == null) {
-                try {
-                    target = org.apache.commons.io.IOUtils.toString(tar, StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
             return target;
         }
 
         @Override
         public boolean targetExists() {
-            return false;
+            return true;
         } //FIXME: check properly
     }
 }

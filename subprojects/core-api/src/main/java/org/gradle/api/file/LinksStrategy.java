@@ -52,7 +52,7 @@ public interface LinksStrategy extends Serializable {
                 return false;
             }
             if (!linkDetails.isRelative()) {
-                throw new GradleException(String.format("Links strategy is set to %s, but a symlink pointing outside was visited: %s pointing to %s.", this, pathHint(originalPath), linkDetails.getTarget()));
+                throw new GradleException(String.format("Links strategy is set to %s, but a symlink pointing outside was visited: '%s' pointing to '%s'.", this, pathHint(originalPath), linkDetails.getTarget()));
             }
             return true;
         }
@@ -111,7 +111,7 @@ public interface LinksStrategy extends Serializable {
 
     default void maybeThrowOnBrokenLink(@Nullable SymbolicLinkDetails linkDetails, String originalPath) {
         if (linkDetails != null && !linkDetails.targetExists()) {
-            throw new GradleException(String.format("Couldn't follow symbolic link '%s'.", pathHint(originalPath)));
+            throw new GradleException(String.format("Couldn't follow symbolic link '%s' pointing to '%s'.", pathHint(originalPath), linkDetails.getTarget()));
         }
     }
 

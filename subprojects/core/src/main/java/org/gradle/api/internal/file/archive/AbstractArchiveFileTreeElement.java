@@ -36,6 +36,7 @@ public abstract class AbstractArchiveFileTreeElement extends CopyableFileTreeEle
     private final File expandedDir;
     private File file;
     private final AtomicBoolean stopFlag;
+    private RelativePath relativePath = null;
 
     /**
      * Creates a new instance.
@@ -75,7 +76,7 @@ public abstract class AbstractArchiveFileTreeElement extends CopyableFileTreeEle
     protected abstract String getEntryName();
 
     @Override
-    public File getFile() {
+    public File getFile() { //fixme
         if (file == null) {
             file = new File(expandedDir, safeEntryName());
             if (!file.exists()) {
@@ -87,7 +88,10 @@ public abstract class AbstractArchiveFileTreeElement extends CopyableFileTreeEle
 
     @Override
     public RelativePath getRelativePath() {
-        return new RelativePath(!getArchiveEntry().isDirectory(), safeEntryName().split("/"));
+        if (relativePath == null) {
+            relativePath = new RelativePath(isSymbolicLink() || !isDirectory(), safeEntryName().split("/"));
+        }
+        return relativePath;
     }
 
     @Override
