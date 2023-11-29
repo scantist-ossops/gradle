@@ -37,6 +37,8 @@ class DefaultJavaCompilerFactoryTest extends Specification {
         Stub(AnnotationProcessorDetector),
         Stub(ClassPathRegistry),
         Stub(ActionExecutionSpecFactory),
+        Stub(BuildLayout),
+        Stub(ProjectCacheDir),
         Stub(Problems)
     )
 
