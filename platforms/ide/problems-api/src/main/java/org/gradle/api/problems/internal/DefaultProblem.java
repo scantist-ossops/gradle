@@ -118,10 +118,6 @@ public class DefaultProblem implements Problem, Serializable {
         return additionalData;
     }
 
-    public void setBuildOperationRef(@Nullable OperationIdentifier buildOperationId) {
-        this.buildOperationId = buildOperationId;
-    }
-
     @Nullable
     public OperationIdentifier getBuildOperationId() {
         return buildOperationId;
