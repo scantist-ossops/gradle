@@ -48,5 +48,4 @@ public interface ProblemReporter {
      * @return nothing, the method throws an exception
      */
     RuntimeException rethrowing(RuntimeException e, ProblemBuilderSpec action);
-
 }

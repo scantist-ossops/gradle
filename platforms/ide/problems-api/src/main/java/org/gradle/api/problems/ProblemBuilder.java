@@ -50,14 +50,6 @@ public interface ProblemBuilder {
     /**
      * Declares the problem category.
      *
-     * It offers a hierarchical categorization with arbitrary details.
-     * Clients must declare a main category string. Freeform with the following conventions and limitations.
-     * Subcategories can be optionally specified with arbitrary details. The same conventions and limitations apply.
-     * When a problem is created (with BuildableProblemBuilder.build()) the category can be obtained with {@link Problem}.
-     * The `ProblemCategory` then represents a local category with some namespace, distinguishing built-in and third-party categories.
-     * Example:
-     * {@code category("validation", "missing-input") }
-
      * @param category the type name
      * @param details the type details
      * @return the builder for the next required property
