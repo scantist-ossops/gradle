@@ -36,6 +36,13 @@ public class DefaultProblemReporter implements InternalProblemReporter {
     }
 
     @Override
+    public void reporting(ProblemBuilderSpec action) {
+        DefaultBasicProblemBuilder defaultProblemBuilder = createProblemBuilder();
+        action.apply(defaultProblemBuilder);
+        report(defaultProblemBuilder.build());
+    }
+
+    @Override
     public RuntimeException throwing(ProblemBuilderSpec action) {
         DefaultBasicProblemBuilder defaultProblemBuilder = createProblemBuilder();
         action.apply(defaultProblemBuilder);

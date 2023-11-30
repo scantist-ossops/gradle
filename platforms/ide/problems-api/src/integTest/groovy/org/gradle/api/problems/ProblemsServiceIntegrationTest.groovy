@@ -41,14 +41,14 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    problems.forCoreNamespace().create {
+                    problems.forCoreNamespace().reporting {
                         it.label("label")
                         .stackLocation()
                         .category("type")
-                        }.report()
+                    }
                 }
             }
-            """
+        """
 
         when:
         run("reportProblem")
@@ -88,11 +88,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    problems.forCoreNamespace().create {
+                    problems.forCoreNamespace().reporting {
                         it.label("label")
                         .documentedAt(Documentation.userManual("test-id", "test-section"))
                         .category("type")
-                        }.report()
+                    }
                 }
             }
             """
@@ -123,11 +123,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    problems.forCoreNamespace().create {
+                    problems.forCoreNamespace().reporting {
                         it.label("label")
                         .documentedAt(Documentation.upgradeGuide(8, "test-section"))
                         .category("type")
-                        }.report()
+                        }
                 }
             }
             """
@@ -148,22 +148,23 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
         given:
         buildFile """
             import org.gradle.api.problems.Problem
+            import org.gradle.api.problems.internal.InternalProblems
             import org.gradle.api.problems.Severity
             import org.gradle.internal.deprecation.Documentation
 
             abstract class ProblemReportingTask extends DefaultTask {
                 @Inject
-                protected abstract Problems getProblems();
+                protected abstract InternalProblems getProblems();
 
                 @TaskAction
                 void run() {
-                    problems.forCoreNamespace().create {
+                    problems.forCoreNamespace().reporting {
                         it.label("label")
                         .documentedAt(
                             Documentation.dslReference(Problem.class, "label")
                         )
                         .category("type")
-                        }.report()
+                        }
                 }
             }
             """
@@ -191,11 +192,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    problems.forCoreNamespace().create {
+                    problems.forCoreNamespace().reporting {
                         it.label("label")
                         .fileLocation("test-location", null, null, null)
                         .category("type")
-                        }.report()
+                    }
                 }
             }
             """
@@ -227,11 +228,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    problems.forCoreNamespace().create {
+                    problems.forCoreNamespace().reporting {
                         it.label("label")
                         .fileLocation("test-location", 1, 2, 3)
                         .category("type")
-                        }.report()
+                    }
                 }
             }
             """
@@ -270,11 +271,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    problems.forCoreNamespace().create {
+                    problems.forCoreNamespace().reporting {
                         it.label("label")
                         .pluginLocation("org.example.pluginid")
                         .category("type")
-                        }.report()
+                    }
                 }
             }
             """
@@ -304,12 +305,12 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    problems.forNamespace("org.example.plugin").create {
+                    problems.forNamespace("org.example.plugin").reporting {
                         it.label("label")
                         .category("type")
                         .solution("solution")
                         .severity(Severity.${severity.name()})
-                        }.report()
+                    }
                 }
             }
             """

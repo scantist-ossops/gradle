@@ -174,7 +174,7 @@ abstract class AbstractIntegrationSpec extends Specification {
         return "junit:junit:4.13"
     }
 
-    void buildFile(@GroovyBuildScriptLanguage String script) {
+    void buildFile(String script) {
         groovyFile(buildFile, script)
     }
 

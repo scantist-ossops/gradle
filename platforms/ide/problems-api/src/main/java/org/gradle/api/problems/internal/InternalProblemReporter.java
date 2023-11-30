@@ -18,12 +18,24 @@ package org.gradle.api.problems.internal;
 
 import org.gradle.api.problems.BasicProblemBuilder;
 import org.gradle.api.problems.Problem;
+import org.gradle.api.problems.ProblemBuilderSpec;
 import org.gradle.api.problems.ProblemReporter;
 import org.gradle.internal.service.scopes.Scopes;
 import org.gradle.internal.service.scopes.ServiceScope;
 
 @ServiceScope(Scopes.BuildTree.class)
 public interface InternalProblemReporter extends ProblemReporter {
+
+    /**
+     * Configures a new problem.
+     * <p>
+     * If all required fields are provided, the method creates and returns a new problem.
+     * Problems should be reported separately with {@link #report(Problem)}.
+     *
+     * @param action the configuration object
+     * @return a new problem
+     */
+    Problem create(ProblemBuilderSpec action);
 
     /**
      * Returns a new problem builder which can configure and create Problem instances.
@@ -35,4 +47,10 @@ public interface InternalProblemReporter extends ProblemReporter {
      */
     BasicProblemBuilder createProblemBuilder();
 
+    /**
+     * Reports the target problem.
+     *
+     * @param problem The problem to report.
+     */
+    void report(Problem problem);
 }
