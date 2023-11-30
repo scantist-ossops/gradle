@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package org.gradle.api.problems;
+package org.gradle.api.problems.internal;
 
-import org.gradle.api.Incubating;
+import org.gradle.api.problems.Problem;
+
 
 /**
  * Interface for emitting problems.
- *
- * @since 8.6
  */
-@Incubating
 public interface ProblemEmitter {
 
     /**
      * Emits the given problem in an implementation specific way.
      *
      * @param problem The problem to emit.
-     * @since 8.6
      */
     void emit(Problem problem);
 

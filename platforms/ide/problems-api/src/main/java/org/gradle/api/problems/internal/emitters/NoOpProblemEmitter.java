@@ -17,7 +17,7 @@
 package org.gradle.api.problems.internal.emitters;
 
 import org.gradle.api.problems.Problem;
-import org.gradle.api.problems.ProblemEmitter;
+import org.gradle.api.problems.internal.ProblemEmitter;
 
 public class NoOpProblemEmitter implements ProblemEmitter {
     @Override

@@ -19,7 +19,6 @@ package org.gradle.api.problems.internal;
 import org.gradle.api.problems.Problem;
 import org.gradle.api.problems.ProblemBuilder;
 import org.gradle.api.problems.ProblemBuilderSpec;
-import org.gradle.api.problems.ProblemEmitter;
 
 import java.util.List;
 

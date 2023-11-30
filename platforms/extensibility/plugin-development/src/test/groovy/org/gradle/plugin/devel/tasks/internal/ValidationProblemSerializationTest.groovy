@@ -18,7 +18,7 @@ package org.gradle.plugin.devel.tasks.internal
 
 import com.google.gson.Gson
 import org.gradle.api.problems.DocLink
-import org.gradle.api.problems.ProblemEmitter
+import org.gradle.api.problems.internal.ProblemEmitter
 import org.gradle.api.problems.Severity
 import org.gradle.api.problems.internal.DefaultProblemReporter
 import org.gradle.api.problems.internal.InternalProblemReporter
