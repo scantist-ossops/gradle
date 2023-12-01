@@ -95,13 +95,15 @@ public class DefaultScriptClassPathResolver implements ScriptClassPathResolver {
             version.reject(Log4jBannedVersion.LOG4J2_CORE_VULNERABLE_VERSION_RANGE);
         })));
 
-        dependencyHandler.getArtifactTypes().getByName(JAR_TYPE).getAttributes()
-            .attribute(INSTRUMENTED_ATTRIBUTE, NOT_INSTRUMENTED_ATTRIBUTE)
-            .attribute(HIERARCHY_COLLECTED_ATTRIBUTE, false);
+        if (!dependencyHandler.getArtifactTypes().getByName(JAR_TYPE).getAttributes().contains(INSTRUMENTED_ATTRIBUTE)) {
+            dependencyHandler.getArtifactTypes().getByName(JAR_TYPE).getAttributes()
+                .attribute(INSTRUMENTED_ATTRIBUTE, NOT_INSTRUMENTED_ATTRIBUTE)
+                .attribute(HIERARCHY_COLLECTED_ATTRIBUTE, false);
 
-        // Register instrumentation transforms
-        registerTransform(dependencyHandler, ExternalDependencyInstrumentingArtifactTransform.class, INSTRUMENTED_EXTERNAL_DEPENDENCY_ATTRIBUTE);
-        registerTransform(dependencyHandler, ProjectDependencyInstrumentingArtifactTransform.class, INSTRUMENTED_PROJECT_DEPENDENCY_ATTRIBUTE);
+            // Register instrumentation transforms
+            registerTransform(dependencyHandler, ExternalDependencyInstrumentingArtifactTransform.class, INSTRUMENTED_EXTERNAL_DEPENDENCY_ATTRIBUTE);
+            registerTransform(dependencyHandler, ProjectDependencyInstrumentingArtifactTransform.class, INSTRUMENTED_PROJECT_DEPENDENCY_ATTRIBUTE);
+        }
     }
 
     private void registerTransform(DependencyHandler dependencyHandler, Class<? extends BaseInstrumentingArtifactTransform> transform, String instrumentedAttribute) {
