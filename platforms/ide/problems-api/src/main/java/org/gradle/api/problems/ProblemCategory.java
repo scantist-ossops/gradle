@@ -72,4 +72,6 @@ public interface ProblemCategory {
      * @return The subcategories.
      */
     List<String> getSubCategories();
+
+    // TODO (donat) consider adding VERIFICATION/Unrecoverable field here.
 }

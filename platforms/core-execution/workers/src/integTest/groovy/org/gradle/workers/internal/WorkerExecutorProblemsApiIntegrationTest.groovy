@@ -21,6 +21,8 @@ import org.gradle.workers.fixtures.WorkerExecutorFixture
 
 class WorkerExecutorProblemsApiIntegrationTest extends AbstractIntegrationSpec {
 
+    // TODO (donat) have a test where exceptions are serialized
+
     def setup() {
         file('buildSrc/build.gradle') << """
             plugins {

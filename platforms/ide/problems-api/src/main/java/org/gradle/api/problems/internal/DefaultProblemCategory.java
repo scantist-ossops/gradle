@@ -31,7 +31,7 @@ import java.util.List;
  */
 public class DefaultProblemCategory implements ProblemCategory, InternalProblemCategory, Serializable {
 
-    private static final String NAMESPACE_GRADLE_CORE = "gradle";
+    private static final String NAMESPACE_GRADLE_CORE = "gradle"; // TODO (donat) org.gradle
     private static final String NAMESPACE_PREFIX_GRADLE_PLUGIN = "gradle-plugin";
     private static final String SEPARATOR = Path.SEPARATOR;
 

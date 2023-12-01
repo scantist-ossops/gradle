@@ -39,5 +39,5 @@ public interface Problems {
      * @return The problem reporter.
      * @since 8.6
      */
-    ProblemReporter forPlugin(String pluginId);
+    ProblemReporter forPlugin(String pluginId); // TODO (donat) rename it back to forNamespace and document that the recommended namespace is the plugin id.
 }
