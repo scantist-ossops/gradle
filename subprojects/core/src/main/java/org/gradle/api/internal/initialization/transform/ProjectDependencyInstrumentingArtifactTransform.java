@@ -17,7 +17,9 @@
 package org.gradle.api.internal.initialization.transform;
 
 import org.gradle.api.artifacts.transform.InputArtifact;
+import org.gradle.api.artifacts.transform.TransformAction;
 import org.gradle.api.file.FileSystemLocation;
+import org.gradle.api.internal.initialization.transform.BaseInstrumentingArtifactTransform.InstrumentArtifactTransformParameters;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Classpath;
 import org.gradle.work.DisableCachingByDefault;
@@ -26,7 +28,7 @@ import org.gradle.work.DisableCachingByDefault;
  * Artifact transform that instruments project based plugins with Gradle instrumentation.
  */
 @DisableCachingByDefault(because = "Instrumented jars are too big to cache.")
-public abstract class ProjectDependencyInstrumentingArtifactTransform extends BaseInstrumentingArtifactTransform {
+public abstract class ProjectDependencyInstrumentingArtifactTransform extends BaseInstrumentingArtifactTransform implements TransformAction<InstrumentArtifactTransformParameters> {
 
     @Override
     @Classpath

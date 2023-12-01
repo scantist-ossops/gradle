@@ -16,11 +16,12 @@
 
 package org.gradle.api.internal.initialization.transform;
 
+import org.gradle.api.artifacts.transform.TransformAction;
 import org.gradle.work.DisableCachingByDefault;
 
 /**
  * Artifact transform that instruments external plugins with Gradle instrumentation.
  */
 @DisableCachingByDefault(because = "Instrumented jars are too big to cache")
-public abstract class ExternalDependencyInstrumentingArtifactTransform extends BaseInstrumentingArtifactTransform {
+public abstract class ExternalDependencyInstrumentingArtifactTransform extends BaseInstrumentingArtifactTransform implements TransformAction<BaseInstrumentingArtifactTransform.InstrumentArtifactTransformParameters> {
 }
