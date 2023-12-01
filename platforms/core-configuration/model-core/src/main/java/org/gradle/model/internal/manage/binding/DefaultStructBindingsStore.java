@@ -62,6 +62,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -266,7 +267,7 @@ public class DefaultStructBindingsStore implements StructBindingsStore {
     }
 
     private static boolean isManagedPropertyAccessor(StructBindingExtractionContext<?> extractionContext, String propertyName, Collection<StructMethodBinding> bindings) {
-        Set<WeaklyTypeReferencingMethod<?, ?>> implMethods = Sets.newLinkedHashSet();
+        Set<WeaklyTypeReferencingMethod<?, ?>> implMethods = new LinkedHashSet<>();
         for (StructMethodBinding binding : bindings) {
             if (binding instanceof StructMethodImplementationBinding) {
                 implMethods.add(((StructMethodImplementationBinding) binding).getImplementerMethod());
@@ -285,7 +286,7 @@ public class DefaultStructBindingsStore implements StructBindingsStore {
     }
 
     private static ModelType<?> determineManagedPropertyType(StructBindingExtractionContext<?> extractionContext, String propertyName, Multimap<PropertyAccessorType, StructMethodBinding> accessorBindings) {
-        Set<ModelType<?>> potentialPropertyTypes = Sets.newLinkedHashSet();
+        Set<ModelType<?>> potentialPropertyTypes = new LinkedHashSet<>();
         for (StructMethodBinding binding : accessorBindings.values()) {
             if (binding.getAccessorType() == SETTER) {
                 continue;
@@ -313,7 +314,7 @@ public class DefaultStructBindingsStore implements StructBindingsStore {
     }
 
     private static <T, D> Set<ModelType<?>> collectImplementedViews(ModelType<T> publicType, Iterable<? extends ModelType<?>> internalViewTypes, ModelType<D> delegateType) {
-        final Set<ModelType<?>> viewsToImplement = Sets.newLinkedHashSet();
+        final Set<ModelType<?>> viewsToImplement = new LinkedHashSet<>();
         viewsToImplement.add(publicType);
         Iterables.addAll(viewsToImplement, internalViewTypes);
         // TODO:LPTR This should be removed once BinaryContainer is a ModelMap
