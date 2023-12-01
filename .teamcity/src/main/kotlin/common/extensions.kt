@@ -101,7 +101,12 @@ fun Requirements.requiresNotSharedHost() {
  */
 const val hiddenArtifactDestination = ".teamcity/gradle-logs"
 
-fun BuildType.applyDefaultSettings(os: Os = Os.LINUX, arch: Arch = Arch.AMD64, buildJvm: Jvm = BuildToolBuildJvm, timeout: Int = 30) {
+fun BuildType.applyDefaultSettings(
+    os: Os = Os.LINUX,
+    arch: Arch = Arch.AMD64,
+    buildJvm: Jvm = BuildToolBuildJvm,
+    timeout: Int = 30
+) {
     artifactRules = """
         *.psoutput => $hiddenArtifactDestination
         *.threaddump => $hiddenArtifactDestination
@@ -115,7 +120,11 @@ fun BuildType.applyDefaultSettings(os: Os = Os.LINUX, arch: Arch = Arch.AMD64, b
     paramsForBuildToolBuild(buildJvm, os, arch)
     params {
         // The promotion job doesn't have a branch, so %teamcity.build.branch% doesn't work.
-        param("env.BUILD_BRANCH", "%dep.Gradle_${DslContext.uuidPrefix}_Check_CompileAllBuild.teamcity.build.branch%")
+        param(
+            "env.BUILD_BRANCH",
+            if (this@applyDefaultSettings is CompileAll) "%teamcity.build.branch%"
+            else "%dep.Gradle_${DslContext.uuidPrefix}_Check_CompileAllBuild.teamcity.build.branch%"
+        )
     }
 
     vcs {
@@ -151,7 +160,8 @@ fun BuildType.applyDefaultSettings(os: Os = Os.LINUX, arch: Arch = Arch.AMD64, b
     }
 }
 
-fun javaHome(jvm: Jvm, os: Os, arch: Arch = Arch.AMD64) = "%${os.name.lowercase()}.${jvm.version}.${jvm.vendor}.${arch.suffix}%"
+fun javaHome(jvm: Jvm, os: Os, arch: Arch = Arch.AMD64) =
+    "%${os.name.lowercase()}.${jvm.version}.${jvm.vendor}.${arch.suffix}%"
 
 fun BuildType.paramsForBuildToolBuild(buildJvm: Jvm = BuildToolBuildJvm, os: Os, arch: Arch = Arch.AMD64) {
     params {
@@ -209,7 +219,11 @@ fun BuildStep.skipConditionally(buildType: BuildType? = null) {
     }
 }
 
-fun buildToolGradleParameters(daemon: Boolean = true, isContinue: Boolean = true, maxParallelForks: String = "%maxParallelForks%"): List<String> =
+fun buildToolGradleParameters(
+    daemon: Boolean = true,
+    isContinue: Boolean = true,
+    maxParallelForks: String = "%maxParallelForks%"
+): List<String> =
     listOf(
         // We pass the 'maxParallelForks' setting as 'workers.max' to limit the maximum number of executers even
         // if multiple test tasks run in parallel. We also pass it to the Gradle build as a maximum (maxParallelForks)
@@ -244,7 +258,13 @@ fun Dependencies.compileAllDependency(compileAllId: String) {
     }
 }
 
-fun functionalTestExtraParameters(buildScanTag: String, os: Os, arch: Arch, testJvmVersion: String, testJvmVendor: String): String {
+fun functionalTestExtraParameters(
+    buildScanTag: String,
+    os: Os,
+    arch: Arch,
+    testJvmVersion: String,
+    testJvmVendor: String
+): String {
     val buildScanValues = mapOf(
         "coverageOs" to os.name.lowercase(),
         "coverageArch" to arch.name.lowercase(),
@@ -269,7 +289,12 @@ fun functionalTestParameters(os: Os): List<String> {
     )
 }
 
-fun promotionBuildParameters(dependencyBuildId: RelativeId, extraParameters: String, gitUserName: String, gitUserEmail: String) =
+fun promotionBuildParameters(
+    dependencyBuildId: RelativeId,
+    extraParameters: String,
+    gitUserName: String,
+    gitUserEmail: String
+) =
     """-PcommitId=%dep.$dependencyBuildId.build.vcs.number% $extraParameters "-PgitUserName=$gitUserName" "-PgitUserEmail=$gitUserEmail" $pluginPortalUrlOverride %additional.gradle.parameters%"""
 
 /**
@@ -281,11 +306,23 @@ enum class KillProcessMode {
     KILL_ALL_GRADLE_PROCESSES
 }
 
-fun BuildSteps.killProcessStep(buildType: BuildType?, mode: KillProcessMode, os: Os, arch: Arch = Arch.AMD64, executionMode: BuildStep.ExecutionMode = BuildStep.ExecutionMode.DEFAULT) {
+fun BuildSteps.killProcessStep(
+    buildType: BuildType?,
+    mode: KillProcessMode,
+    os: Os,
+    arch: Arch = Arch.AMD64,
+    executionMode: BuildStep.ExecutionMode = BuildStep.ExecutionMode.DEFAULT
+) {
     script {
         name = mode.toString()
         this.executionMode = executionMode
-        scriptContent = "\"${javaHome(BuildToolBuildJvm, os, arch)}/bin/java\" build-logic/cleanup/src/main/java/gradlebuild/cleanup/services/KillLeakingJavaProcesses.java $mode" +
+        scriptContent = "\"${
+            javaHome(
+                BuildToolBuildJvm,
+                os,
+                arch
+            )
+        }/bin/java\" build-logic/cleanup/src/main/java/gradlebuild/cleanup/services/KillLeakingJavaProcesses.java $mode" +
             if (os == Os.WINDOWS) "\nwmic Path win32_process Where \"name='java.exe'\"" else ""
         skipConditionally(buildType)
         if (mode == KILL_ALL_GRADLE_PROCESSES && buildType is FunctionalTest) {
@@ -294,13 +331,19 @@ fun BuildSteps.killProcessStep(buildType: BuildType?, mode: KillProcessMode, os:
     }
 }
 
-fun BuildType.killProcessStep(mode: KillProcessMode, os: Os, arch: Arch = Arch.AMD64, executionMode: BuildStep.ExecutionMode = BuildStep.ExecutionMode.DEFAULT) {
+fun BuildType.killProcessStep(
+    mode: KillProcessMode,
+    os: Os,
+    arch: Arch = Arch.AMD64,
+    executionMode: BuildStep.ExecutionMode = BuildStep.ExecutionMode.DEFAULT
+) {
     steps {
         killProcessStep(this@killProcessStep, mode, os, arch, executionMode)
     }
 }
 
-fun String.toCapitalized() = this.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+fun String.toCapitalized() =
+    this.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
 
 /**
  * Define clean up rules for the project.
