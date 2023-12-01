@@ -17,11 +17,12 @@
 package org.gradle.api.internal.provider.sources;
 
 import org.gradle.api.internal.properties.GradleProperties;
+import org.gradle.api.provider.ValueSource;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
-public abstract class GradlePropertyValueSource extends AbstractPropertyValueSource<GradlePropertyValueSource.Parameters> {
+public abstract class GradlePropertyValueSource extends AbstractPropertyValueSource<GradlePropertyValueSource.Parameters> implements ValueSource<String, GradlePropertyValueSource.Parameters> {
 
     public interface Parameters extends AbstractPropertyValueSource.Parameters {
     }

@@ -16,9 +16,11 @@
 
 package org.gradle.api.internal.provider.sources;
 
+import org.gradle.api.provider.ValueSource;
+
 import javax.annotation.Nullable;
 
-public abstract class SystemPropertyValueSource extends AbstractPropertyValueSource<SystemPropertyValueSource.Parameters> {
+public abstract class SystemPropertyValueSource extends AbstractPropertyValueSource<SystemPropertyValueSource.Parameters> implements ValueSource<String, SystemPropertyValueSource.Parameters> {
 
     public interface Parameters extends AbstractPropertyValueSource.Parameters {}
 
