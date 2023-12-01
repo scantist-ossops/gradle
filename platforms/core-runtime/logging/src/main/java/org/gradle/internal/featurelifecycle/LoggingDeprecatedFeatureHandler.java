@@ -89,7 +89,7 @@ public class LoggingDeprecatedFeatureHandler implements FeatureHandler<Deprecate
             }
         }
         if (problemsService != null) {
-            InternalProblemReporter reporter = ((InternalProblems) problemsService).forCoreNamespace();
+            InternalProblemReporter reporter = ((InternalProblems) problemsService).forCore();
             Problem problem = reporter.create(new ProblemBuilderSpec() {
                 @Override
                 public ProblemBuilder apply(ProblemBuilder builder) {

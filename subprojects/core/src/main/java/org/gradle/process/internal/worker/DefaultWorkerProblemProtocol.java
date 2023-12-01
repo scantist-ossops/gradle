@@ -28,7 +28,7 @@ public class DefaultWorkerProblemProtocol implements WorkerProblemProtocol {
 
     @Override
     public void reportProblem(DefaultProblem problem) {
-        InternalProblemReporter problemService = ((InternalProblems) ProblemsProgressEventEmitterHolder.get()).forCoreNamespace();
+        InternalProblemReporter problemService = ((InternalProblems) ProblemsProgressEventEmitterHolder.get()).forCore();
         problemService.report(problem);
     }
 

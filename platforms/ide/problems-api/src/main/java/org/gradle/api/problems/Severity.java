@@ -19,7 +19,7 @@ package org.gradle.api.problems;
 import org.gradle.api.Incubating;
 
 /**
- * Severity.
+ * A problem severity.
  *
  * @since 8.4
  */

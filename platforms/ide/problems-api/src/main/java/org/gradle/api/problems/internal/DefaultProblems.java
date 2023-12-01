@@ -28,7 +28,6 @@ public class DefaultProblems implements InternalProblems {
 
     private ProblemEmitter emitter;
     private final List<ProblemTransformer> transformers;
-
     private final InternalProblemReporter internalReporter;
 
     public DefaultProblems(ProblemEmitter emitter) {
@@ -46,8 +45,8 @@ public class DefaultProblems implements InternalProblems {
     }
 
     @Override
-    public ProblemReporter forNamespace(String namespace) {
-        return createReporter(DefaultProblemCategory.getPluginNamespace(namespace), emitter, transformers);
+    public ProblemReporter forPlugin(String pluginId) {
+        return createReporter(DefaultProblemCategory.getPluginNamespace(pluginId), emitter, transformers);
     }
 
     private static DefaultProblemReporter createReporter(String namespace, ProblemEmitter emitter, List<ProblemTransformer> transformers) {
@@ -55,7 +54,7 @@ public class DefaultProblems implements InternalProblems {
     }
 
     @Override
-    public InternalProblemReporter forCoreNamespace() {
+    public InternalProblemReporter forCore() {
         return internalReporter;
     }
 }

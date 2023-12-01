@@ -59,7 +59,7 @@ class ProblemServiceModelBuilderCrossVersionTest extends ToolingApiSpecification
                     return modelName == '${CustomModel.name}'
                 }
                 Object buildAll(String modelName, Project project) {
-                    problemService.${publicApi ? "forNamespace(\"org.example.plugin\").reporting" : "create"} {
+                    problemService.${publicApi ? "forPlugin(\"org.example.plugin\").reporting" : "create"} {
                         it.label("label")
                             .category("testcategory")
                             .withException(new RuntimeException("test"))

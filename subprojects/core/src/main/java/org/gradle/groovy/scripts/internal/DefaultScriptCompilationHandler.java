@@ -216,7 +216,7 @@ public class DefaultScriptCompilationHandler implements ScriptCompilationHandler
         SyntaxException syntaxError = e.getErrorCollector().getSyntaxError(0);
         int lineNumber = syntaxError == null ? -1 : syntaxError.getLine();
         String message = String.format("Could not compile %s.", source.getDisplayName());
-        throw ((InternalProblems)getProblemService()).forCoreNamespace().throwing(new ProblemBuilderSpec() {
+        throw ((InternalProblems)getProblemService()).forCore().throwing(new ProblemBuilderSpec() {
             @Override
             public ProblemBuilder apply(ProblemBuilder builder) {
                 return builder

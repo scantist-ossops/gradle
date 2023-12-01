@@ -34,14 +34,10 @@ import org.gradle.internal.service.scopes.ServiceScope;
 public interface Problems {
 
     /**
-     * Return a problem reporter for a particular namespace.
-     * <p>
-     * The recommendation is to use the plugin ID as the namespace.
-     * The namespace will be part of the category of the reported problems.
+     * Return a problem reporter associated with a plugin.
      *
      * @return The problem reporter.
-     * @see ProblemCategory
      * @since 8.6
      */
-    ProblemReporter forNamespace(String namespace);
+    ProblemReporter forPlugin(String pluginId);
 }

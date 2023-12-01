@@ -34,18 +34,19 @@ public interface ProblemReporter {
     void reporting(ProblemBuilderSpec action);
 
     /**
-     * Configures a new problem, reports it and uses it to throw a new exception.
+     * Configures a new problem, reports it, and uses it to throw a new exception.
      * <p>
+     * An exception must be provided in the spec.
      *
      * @return nothing, the method throws an exception
      */
-    RuntimeException throwing(ProblemBuilderSpec action);
+    RuntimeException throwing(ProblemBuilderSpec spec);
 
     /**
-     * Configures a new problem using an existing exception as input, reports it and uses it to throw a new exception.
+     * Configures a new problem using an existing exception as input, reports it, and uses it to throw a new exception.
      * <p>
      *
      * @return nothing, the method throws an exception
      */
-    RuntimeException rethrowing(RuntimeException e, ProblemBuilderSpec action);
+    RuntimeException rethrowing(RuntimeException e, ProblemBuilderSpec spec);
 }

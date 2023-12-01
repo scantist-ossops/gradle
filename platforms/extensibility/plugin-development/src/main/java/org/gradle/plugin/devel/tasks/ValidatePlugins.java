@@ -108,7 +108,7 @@ public abstract class ValidatePlugins extends DefaultTask {
         getWorkerExecutor().await();
 
         InternalProblems problems = getServices().get(InternalProblems.class);
-        InternalProblemReporter reporter = problems.forCoreNamespace();
+        InternalProblemReporter reporter = problems.forCore();
         List<? extends Problem> problemMessages = ValidationProblemSerialization.parseMessageList(new String(Files.readAllBytes(getOutputFile().get().getAsFile().toPath())), reporter);
 
         Stream<String> messages = ValidationProblemSerialization.toPlainMessage(problemMessages).sorted();

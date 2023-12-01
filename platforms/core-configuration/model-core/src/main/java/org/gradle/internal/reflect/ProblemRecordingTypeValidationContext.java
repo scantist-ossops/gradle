@@ -47,11 +47,11 @@ abstract public class ProblemRecordingTypeValidationContext implements TypeValid
 
     @Override
     public void visitTypeProblem(Action<? super TypeAwareProblemBuilder> problemSpec) {
-        InternalProblems internalProblems = (InternalProblems) ProblemsProgressEventEmitterHolder.get();
-        InternalProblemReporter reporter = internalProblems.forCoreNamespace();
+        InternalProblems problems = (InternalProblems) ProblemsProgressEventEmitterHolder.get();
+        InternalProblemReporter reporter = problems.forCore();
         DefaultTypeAwareProblemBuilder problemBuilder = new DefaultTypeAwareProblemBuilder(((DefaultProblemReporter) reporter).createProblemBuilder());
         problemSpec.execute(problemBuilder);
-        recordProblem(internalProblems, problemBuilder.build());
+        recordProblem(problems, problemBuilder.build());
     }
 
     private Optional<PluginId> pluginId() {
@@ -62,7 +62,7 @@ abstract public class ProblemRecordingTypeValidationContext implements TypeValid
     @Override
     public void visitPropertyProblem(Action<? super TypeAwareProblemBuilder> problemSpec) {
         InternalProblems internalProblems = (InternalProblems) ProblemsProgressEventEmitterHolder.get();
-        InternalProblemReporter reporter = internalProblems.forCoreNamespace();
+        InternalProblemReporter reporter = internalProblems.forCore();
         DefaultTypeAwareProblemBuilder problemBuilder = new DefaultTypeAwareProblemBuilder(((DefaultProblemReporter) reporter).createProblemBuilder());
         problemSpec.execute(problemBuilder);
         problemBuilder.withAnnotationType(rootType);

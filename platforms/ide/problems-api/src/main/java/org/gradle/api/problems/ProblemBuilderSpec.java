@@ -19,31 +19,30 @@ package org.gradle.api.problems;
 import org.gradle.api.Incubating;
 
 /**
- * A function that can be used to specify a {@link Problem} using a {@link BasicProblemBuilder}.
+ * A function that can be used to configure a {@link Problem} via {@link BasicProblemBuilder}.
  * <p>
  * Usage example:
  *
  * <pre>
- * throw getProblemService().forNamespace("org.example.plugin").throwing(builder -&gt;
- *        builder.label(message)
- *            .type("task_selection")
- *            .details("long message")
+ * throw getProblemService().forPlugin("org.example.plugin").throwing(spec -&gt;
+ *        spec.label("Task 'foo' does not exist")
+ *            .category("task-selection")
  *            .severity(Severity.ERROR)
- *            .withException(new TaskSelectionException(message)));
+ *            .withException(new TaskSelectionException()));
  * </pre>
- *
- * Using this instead of an {@link org.gradle.api.Action} forces the user to specify all required properties of a {@link Problem}.
  *
  * @since 8.4
  */
 @Incubating
 public interface ProblemBuilderSpec {
 
+    // TODO (donat) consider changing all Problem API @since annotation to 8.6
+
     /**
-     * Spec method.
+     * Function applying the configuration for the provided object.
      *
-     * @param builder The target builder to configure.
-     * @return The builder.
+     * @param builder The target object
+     * @return The configured object
      * @since 8.6
      */
     ProblemBuilder apply(ProblemBuilder builder);

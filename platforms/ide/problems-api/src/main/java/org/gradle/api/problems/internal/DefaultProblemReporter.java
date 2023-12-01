@@ -42,10 +42,11 @@ public class DefaultProblemReporter implements InternalProblemReporter {
     }
 
     @Override
-    public RuntimeException throwing(ProblemBuilderSpec action) {
+    public RuntimeException throwing(ProblemBuilderSpec spec) {
         DefaultBasicProblemBuilder defaultProblemBuilder = createProblemBuilder();
-        action.apply(defaultProblemBuilder);
+        spec.apply(defaultProblemBuilder);
         Problem problem = defaultProblemBuilder.build();
+        // TODO (donat) throw an IllegalStateException if problem.getException() is null
         throw throwError(problem.getException(), problem);
     }
 
@@ -55,9 +56,9 @@ public class DefaultProblemReporter implements InternalProblemReporter {
     }
 
     @Override
-    public RuntimeException rethrowing(RuntimeException e, ProblemBuilderSpec action) {
+    public RuntimeException rethrowing(RuntimeException e, ProblemBuilderSpec spec) {
         DefaultBasicProblemBuilder defaultProblemBuilder = createProblemBuilder();
-        ProblemBuilder problemBuilder = action.apply(defaultProblemBuilder);
+        ProblemBuilder problemBuilder = spec.apply(defaultProblemBuilder);
         problemBuilder.withException(e);
         throw throwError(e, defaultProblemBuilder.build());
     }

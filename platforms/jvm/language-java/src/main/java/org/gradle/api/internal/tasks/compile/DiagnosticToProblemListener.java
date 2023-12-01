@@ -37,7 +37,7 @@ public class DiagnosticToProblemListener implements DiagnosticListener<JavaFileO
     private final InternalProblemReporter problems;
 
     public DiagnosticToProblemListener(Problems problems) {
-        this.problems = ((InternalProblems) problems).forCoreNamespace();
+        this.problems = ((InternalProblems) problems).forCore();
     }
 
     @Override

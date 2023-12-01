@@ -47,7 +47,7 @@ public class DefaultCatalogProblemBuilder {
         formatter.startChildren();
         for (Problem problem : problems) {
             reportInto(formatter, problem);
-            problemService.forCoreNamespace().report(problem);
+            problemService.forCore().report(problem);
         }
         formatter.endChildren();
         throw new InvalidUserDataException(formatter.toString());

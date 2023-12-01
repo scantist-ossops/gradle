@@ -77,7 +77,7 @@ public class ValidateStep<C extends BeforeExecutionContext, R extends Result> im
             .ifPresent(beforeExecutionState -> validateImplementations(work, beforeExecutionState, validationContext));
 
         InternalProblems problemService = validationContext.getProblemService();
-        InternalProblemReporter reporter = problemService.forCoreNamespace();
+        InternalProblemReporter reporter = problemService.forCore();
         List<Problem> problems = validationContext.getProblems();
         for (Problem problem : problems) {
             reporter.report(problem);

@@ -25,5 +25,5 @@ public interface InternalProblems extends Problems {
      * <p>
      * @return The reporter.
      */
-    InternalProblemReporter forCoreNamespace();
+    InternalProblemReporter forCore();
 }
