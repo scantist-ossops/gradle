@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.gradle.api.NonNullApi;
 import org.gradle.api.problems.DocLink;
-import org.gradle.api.problems.Problem;
 import org.gradle.api.problems.ProblemCategory;
 import org.gradle.api.problems.Severity;
 import org.gradle.api.problems.locations.ProblemLocation;
@@ -33,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @NonNullApi
-public class DefaultProblem implements Problem, Serializable {
+public class DefaultProblem implements InternalProblem, Serializable {
     private final String label;
     private Severity severity;
     private final List<ProblemLocation> locations;

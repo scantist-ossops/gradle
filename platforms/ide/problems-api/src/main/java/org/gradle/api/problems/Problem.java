@@ -17,7 +17,6 @@
 package org.gradle.api.problems;
 
 import org.gradle.api.Incubating;
-import org.gradle.api.problems.internal.BasicProblemBuilder;
 import org.gradle.api.problems.locations.ProblemLocation;
 
 import javax.annotation.Nullable;
@@ -98,12 +97,4 @@ public interface Problem {
      * @since 8.5
      */
     Map<String, Object> getAdditionalData();
-
-    /**
-     * Returns a problem builder with fields initialized with values from this instance.
-     *
-     * @since 8.6
-     */
-    @Incubating
-    BasicProblemBuilder toBuilder();
 }
