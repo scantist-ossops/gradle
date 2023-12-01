@@ -46,10 +46,10 @@ class BuildSrcBuildListenerFactoryTest extends Specification {
     def "executes buildSrc configuration action after projects are loaded"() {
         def action = Mock(Action)
         def listener = new BuildSrcBuildListenerFactory(action, new DefaultScriptClassPathResolver(
-            TestUtil.objectInstantiator(),
-            Stub(AgentStatus),
-            Stub(GradleCoreInstrumentingTypeRegistry)
-        )).create()
+                TestUtil.objectInstantiator(),
+                Stub(AgentStatus),
+                Stub(GradleCoreInstrumentingTypeRegistry)
+        ), agentStatus).create()
 
         when:
         listener.projectsLoaded(gradle)

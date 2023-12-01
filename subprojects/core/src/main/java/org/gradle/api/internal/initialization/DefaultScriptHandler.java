@@ -29,9 +29,14 @@ import org.gradle.api.internal.artifacts.DependencyResolutionServices;
 import org.gradle.api.internal.artifacts.JavaEcosystemSupport;
 import org.gradle.api.internal.artifacts.configurations.ConfigurationRolesForMigration;
 import org.gradle.api.internal.artifacts.configurations.RoleBasedConfigurationContainerInternal;
+import org.gradle.api.internal.initialization.transform.BaseInstrumentingArtifactTransform;
+import org.gradle.api.internal.initialization.transform.ExternalDependencyInstrumentingArtifactTransform;
+import org.gradle.api.internal.initialization.transform.ProjectDependencyInstrumentingArtifactTransform;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.groovy.scripts.ScriptSource;
+import org.gradle.internal.agents.AgentStatus;
+import org.gradle.internal.classanalysis.AsmConstants;
 import org.gradle.internal.classloader.ClasspathUtil;
 import org.gradle.internal.classpath.ClassPath;
 import org.gradle.internal.resource.ResourceLocation;
@@ -42,6 +47,12 @@ import java.io.File;
 import java.net.URI;
 
 import static java.lang.Boolean.getBoolean;
+import static org.gradle.api.artifacts.type.ArtifactTypeDefinition.JAR_TYPE;
+import static org.gradle.api.internal.initialization.DefaultScriptClassPathResolver.HIERARCHY_COLLECTED_ATTRIBUTE;
+import static org.gradle.api.internal.initialization.DefaultScriptClassPathResolver.INSTRUMENTED_ATTRIBUTE;
+import static org.gradle.api.internal.initialization.DefaultScriptClassPathResolver.INSTRUMENTED_EXTERNAL_DEPENDENCY_ATTRIBUTE;
+import static org.gradle.api.internal.initialization.DefaultScriptClassPathResolver.INSTRUMENTED_PROJECT_DEPENDENCY_ATTRIBUTE;
+import static org.gradle.api.internal.initialization.DefaultScriptClassPathResolver.NOT_INSTRUMENTED_ATTRIBUTE;
 
 @NonExtensible
 public class DefaultScriptHandler implements ScriptHandler, ScriptHandlerInternal {
@@ -59,6 +70,7 @@ public class DefaultScriptHandler implements ScriptHandler, ScriptHandlerInterna
     private final DependencyResolutionServices dependencyResolutionServices;
     private final DependencyLockingHandler dependencyLockingHandler;
     private final BuildLogicBuilder buildLogicBuilder;
+    private final AgentStatus agentStatus;
     // The following values are relatively expensive to create, so defer creation until required
     private ClassPath resolvedClasspath;
     private RepositoryHandler repositoryHandler;
@@ -71,13 +83,15 @@ public class DefaultScriptHandler implements ScriptHandler, ScriptHandlerInterna
         ScriptSource scriptSource,
         DependencyResolutionServices dependencyResolutionServices,
         ClassLoaderScope classLoaderScope,
-        BuildLogicBuilder buildLogicBuilder
+        BuildLogicBuilder buildLogicBuilder,
+        AgentStatus agentStatus
     ) {
         this.dependencyResolutionServices = dependencyResolutionServices;
         this.scriptResource = scriptSource.getResource().getLocation();
         this.classLoaderScope = classLoaderScope;
         this.dependencyLockingHandler = dependencyResolutionServices.getDependencyLockingHandler();
         this.buildLogicBuilder = buildLogicBuilder;
+        this.agentStatus = agentStatus;
         JavaEcosystemSupport.configureSchema(dependencyResolutionServices.getAttributesSchema(), dependencyResolutionServices.getObjectFactory());
     }
 
@@ -160,11 +174,35 @@ public class DefaultScriptHandler implements ScriptHandler, ScriptHandlerInterna
         }
     }
 
-    private static DependencyHandler getAndConfigureDependencyHandler(DependencyResolutionServices dependencyResolutionServices) {
+    private DependencyHandler getAndConfigureDependencyHandler(DependencyResolutionServices dependencyResolutionServices) {
         // TODO: JavaEcosystemSupport.configureSchema is called in the constructor, should we move it here?
         DependencyHandler dependencyHandler = dependencyResolutionServices.getDependencyHandler();
         dependencyHandler.getArtifactTypes().create(ArtifactTypeDefinition.JAR_TYPE);
+        if (!dependencyHandler.getArtifactTypes().getByName(JAR_TYPE).getAttributes().contains(INSTRUMENTED_ATTRIBUTE)) {
+            dependencyHandler.getArtifactTypes().getByName(JAR_TYPE).getAttributes()
+                .attribute(INSTRUMENTED_ATTRIBUTE, NOT_INSTRUMENTED_ATTRIBUTE)
+                .attribute(HIERARCHY_COLLECTED_ATTRIBUTE, false);
+
+            // Register instrumentation transforms
+            registerTransform(dependencyHandler, ExternalDependencyInstrumentingArtifactTransform.class, INSTRUMENTED_EXTERNAL_DEPENDENCY_ATTRIBUTE);
+            registerTransform(dependencyHandler, ProjectDependencyInstrumentingArtifactTransform.class, INSTRUMENTED_PROJECT_DEPENDENCY_ATTRIBUTE);
+        }
         return dependencyHandler;
+    }
+
+    public void registerTransform(DependencyHandler dependencyHandler, Class<? extends BaseInstrumentingArtifactTransform> transform, String instrumentedAttribute) {
+        dependencyHandler.registerTransform(
+            transform,
+            spec -> {
+                spec.getFrom().attribute(INSTRUMENTED_ATTRIBUTE, NOT_INSTRUMENTED_ATTRIBUTE);
+                spec.getTo().attribute(INSTRUMENTED_ATTRIBUTE, instrumentedAttribute);
+                spec.parameters(parameters -> {
+                    parameters.getAgentSupported().set(agentStatus.isAgentInstrumentationEnabled());
+                    parameters.getMaxSupportedJavaVersion().set(AsmConstants.MAX_SUPPORTED_JAVA_VERSION);
+//                    parameters.getUpgradedPropertiesHash().set(gradleCoreInstrumentingTypeRegistry.getUpgradedPropertiesHash().map(Object::toString).orElse(null));
+                });
+            }
+        );
     }
 
     @Override

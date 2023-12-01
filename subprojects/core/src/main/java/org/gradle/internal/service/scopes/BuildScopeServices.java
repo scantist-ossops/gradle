@@ -161,6 +161,7 @@ import org.gradle.initialization.properties.ProjectPropertiesLoader;
 import org.gradle.initialization.properties.SystemPropertiesInstaller;
 import org.gradle.internal.actor.ActorFactory;
 import org.gradle.internal.actor.internal.DefaultActorFactory;
+import org.gradle.internal.agents.AgentStatus;
 import org.gradle.internal.authentication.AuthenticationSchemeRegistry;
 import org.gradle.internal.authentication.DefaultAuthenticationSchemeRegistry;
 import org.gradle.internal.build.BuildModelControllerServices;
@@ -499,7 +500,8 @@ public class BuildScopeServices extends ScopedServiceRegistry {
         BuildStateRegistry buildRegistry,
         PublicBuildPath publicBuildPath,
         ScriptClassPathResolver scriptClassPathResolver,
-        BuildLogicBuildQueue buildQueue
+        BuildLogicBuildQueue buildQueue,
+        AgentStatus agentStatus
     ) {
         return new BuildSourceBuilder(
             currentBuild,
@@ -508,7 +510,7 @@ public class BuildScopeServices extends ScopedServiceRegistry {
                 PluginsProjectConfigureActions.of(
                     BuildSrcProjectConfigurationAction.class,
                     cachingServiceLocator),
-                scriptClassPathResolver),
+                scriptClassPathResolver, agentStatus),
             buildRegistry,
             publicBuildPath,
             buildQueue);

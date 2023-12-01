@@ -34,8 +34,6 @@ import org.gradle.api.attributes.plugin.GradlePluginApiVersion;
 import org.gradle.api.file.FileCollection;
 import org.gradle.api.internal.artifacts.dsl.dependencies.DependencyFactoryInternal;
 import org.gradle.api.internal.initialization.transform.BaseInstrumentingArtifactTransform;
-import org.gradle.api.internal.initialization.transform.ExternalDependencyInstrumentingArtifactTransform;
-import org.gradle.api.internal.initialization.transform.ProjectDependencyInstrumentingArtifactTransform;
 import org.gradle.api.internal.model.NamedObjectInstantiator;
 import org.gradle.internal.agents.AgentStatus;
 import org.gradle.internal.classanalysis.AsmConstants;
@@ -50,23 +48,21 @@ import org.gradle.util.GradleVersion;
 import java.util.EnumSet;
 import java.util.Set;
 
-import static org.gradle.api.artifacts.type.ArtifactTypeDefinition.JAR_TYPE;
-
 public class DefaultScriptClassPathResolver implements ScriptClassPathResolver {
 
-    private static final Set<DependencyFactoryInternal.ClassPathNotation> NO_GRADLE_API = EnumSet.copyOf(ImmutableSet.of(
+    public static final Set<DependencyFactoryInternal.ClassPathNotation> NO_GRADLE_API = EnumSet.copyOf(ImmutableSet.of(
         DependencyFactoryInternal.ClassPathNotation.GRADLE_API,
         DependencyFactoryInternal.ClassPathNotation.LOCAL_GROOVY
     ));
 
-    private static final Attribute<Boolean> HIERARCHY_COLLECTED_ATTRIBUTE = Attribute.of("org.gradle.internal.hierarchy-collected", Boolean.class);
-    private static final Attribute<String> INSTRUMENTED_ATTRIBUTE = Attribute.of("org.gradle.internal.instrumented", String.class);
-    private static final String NOT_INSTRUMENTED_ATTRIBUTE = "not-instrumented";
-    private static final String INSTRUMENTED_EXTERNAL_DEPENDENCY_ATTRIBUTE = "instrumented-external-dependency";
-    private static final String INSTRUMENTED_PROJECT_DEPENDENCY_ATTRIBUTE = "instrumented-project-dependency";
-    private final NamedObjectInstantiator instantiator;
-    private final AgentStatus agentStatus;
-    private final GradleCoreInstrumentingTypeRegistry gradleCoreInstrumentingTypeRegistry;
+    public static final Attribute<Boolean> HIERARCHY_COLLECTED_ATTRIBUTE = Attribute.of("org.gradle.internal.hierarchy-collected", Boolean.class);
+    public static final Attribute<String> INSTRUMENTED_ATTRIBUTE = Attribute.of("org.gradle.internal.instrumented", String.class);
+    public static final String NOT_INSTRUMENTED_ATTRIBUTE = "not-instrumented";
+    public static final String INSTRUMENTED_EXTERNAL_DEPENDENCY_ATTRIBUTE = "instrumented-external-dependency";
+    public static final String INSTRUMENTED_PROJECT_DEPENDENCY_ATTRIBUTE = "instrumented-project-dependency";
+    public final NamedObjectInstantiator instantiator;
+    public final AgentStatus agentStatus;
+    public final GradleCoreInstrumentingTypeRegistry gradleCoreInstrumentingTypeRegistry;
 
     public DefaultScriptClassPathResolver(
         NamedObjectInstantiator instantiator,
@@ -94,19 +90,9 @@ public class DefaultScriptClassPathResolver implements ScriptClassPathResolver {
             version.require(Log4jBannedVersion.LOG4J2_CORE_REQUIRED_VERSION);
             version.reject(Log4jBannedVersion.LOG4J2_CORE_VULNERABLE_VERSION_RANGE);
         })));
-
-        if (!dependencyHandler.getArtifactTypes().getByName(JAR_TYPE).getAttributes().contains(INSTRUMENTED_ATTRIBUTE)) {
-            dependencyHandler.getArtifactTypes().getByName(JAR_TYPE).getAttributes()
-                .attribute(INSTRUMENTED_ATTRIBUTE, NOT_INSTRUMENTED_ATTRIBUTE)
-                .attribute(HIERARCHY_COLLECTED_ATTRIBUTE, false);
-
-            // Register instrumentation transforms
-            registerTransform(dependencyHandler, ExternalDependencyInstrumentingArtifactTransform.class, INSTRUMENTED_EXTERNAL_DEPENDENCY_ATTRIBUTE);
-            registerTransform(dependencyHandler, ProjectDependencyInstrumentingArtifactTransform.class, INSTRUMENTED_PROJECT_DEPENDENCY_ATTRIBUTE);
-        }
     }
 
-    private void registerTransform(DependencyHandler dependencyHandler, Class<? extends BaseInstrumentingArtifactTransform> transform, String instrumentedAttribute) {
+    public void registerTransform(DependencyHandler dependencyHandler, Class<? extends BaseInstrumentingArtifactTransform> transform, String instrumentedAttribute) {
         dependencyHandler.registerTransform(
             transform,
             spec -> {
@@ -128,7 +114,7 @@ public class DefaultScriptClassPathResolver implements ScriptClassPathResolver {
         return TransformedClassPath.handleInstrumentingArtifactTransform(DefaultClassPath.of(instrumentedExternalDependencies.plus(instrumentedProjectDependencies)));
     }
 
-    private static FileCollection getInstrumentedExternalDependencies(Configuration classpathConfiguration) {
+    public static FileCollection getInstrumentedExternalDependencies(Configuration classpathConfiguration) {
         return classpathConfiguration.getIncoming().artifactView((Action<? super ArtifactView.ViewConfiguration>) config -> {
             config.attributes(it -> it.attribute(INSTRUMENTED_ATTRIBUTE, INSTRUMENTED_EXTERNAL_DEPENDENCY_ATTRIBUTE));
             config.componentFilter(componentId -> {
@@ -141,7 +127,7 @@ public class DefaultScriptClassPathResolver implements ScriptClassPathResolver {
         }).getFiles();
     }
 
-    private static FileCollection getInstrumentedProjectDependencies(Configuration classpathConfiguration) {
+    public static FileCollection getInstrumentedProjectDependencies(Configuration classpathConfiguration) {
         return classpathConfiguration.getIncoming().artifactView((Action<? super ArtifactView.ViewConfiguration>) config -> {
             config.attributes(it -> it.attribute(INSTRUMENTED_ATTRIBUTE, INSTRUMENTED_PROJECT_DEPENDENCY_ATTRIBUTE));
             config.componentFilter(componentId -> componentId instanceof ProjectComponentIdentifier);
