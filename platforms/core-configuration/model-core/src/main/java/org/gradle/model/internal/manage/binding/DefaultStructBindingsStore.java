@@ -62,10 +62,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutionException;
 
 import static org.gradle.internal.reflect.Methods.DESCRIPTOR_EQUIVALENCE;
@@ -126,7 +128,7 @@ public class DefaultStructBindingsStore implements StructBindingsStore {
             }
         }
 
-        Map<String, Multimap<PropertyAccessorType, StructMethodBinding>> propertyBindings = Maps.newTreeMap();
+        Map<String, Multimap<PropertyAccessorType, StructMethodBinding>> propertyBindings = new TreeMap<>();
         Set<StructMethodBinding> methodBindings = collectMethodBindings(extractionContext, propertyBindings);
         ImmutableSortedMap<String, ManagedProperty<?>> managedProperties = collectManagedProperties(extractionContext, propertyBindings);
 
@@ -436,7 +438,7 @@ public class DefaultStructBindingsStore implements StructBindingsStore {
     }
 
     private static Collection<WeaklyTypeReferencingMethod<?, ?>> collectImplementedMethods(Iterable<StructSchema<?>> implementedSchemas) {
-        Map<Wrapper<Method>, WeaklyTypeReferencingMethod<?, ?>> implementedMethodsBuilder = Maps.newLinkedHashMap();
+        Map<Wrapper<Method>, WeaklyTypeReferencingMethod<?, ?>> implementedMethodsBuilder = new LinkedHashMap<>();
         for (StructSchema<?> implementedSchema : implementedSchemas) {
             for (WeaklyTypeReferencingMethod<?, ?> viewMethod : implementedSchema.getAllMethods()) {
                 implementedMethodsBuilder.put(DESCRIPTOR_EQUIVALENCE.wrap(viewMethod.getMethod()), viewMethod);
