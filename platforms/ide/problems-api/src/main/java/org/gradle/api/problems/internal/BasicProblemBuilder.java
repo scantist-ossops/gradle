@@ -14,28 +14,16 @@
  * limitations under the License.
  */
 
-package org.gradle.api.problems;
+package org.gradle.api.problems.internal;
 
-import org.gradle.api.Incubating;
+import org.gradle.api.problems.DocLink;
+import org.gradle.api.problems.Problem;
+import org.gradle.api.problems.ProblemBuilder;
+import org.gradle.api.problems.Severity;
 
 import javax.annotation.Nullable;
 
-/**
- * {@link Problem} instance builder that is capable of creating new Problem instances.
- *
- * An example of how to use the builder:
- * <pre>{@code
- *  <problemReporter>.report(configurator -> configurator
- *          .label("test problem")
- *          .category("category", "subcategory")
- *          .severity(Severity.ERROR)
- *          .details("this is a test")
- *          .build()
- *  }</pre>
- *
- * @since 8.6
- */
-@Incubating
+
 public interface BasicProblemBuilder extends ProblemBuilder { // TODO (donat) should be renamed to ProblemBuilder after the base type rename is done.
 
     /**

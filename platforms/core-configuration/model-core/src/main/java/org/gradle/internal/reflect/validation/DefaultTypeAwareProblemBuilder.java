@@ -17,7 +17,7 @@
 package org.gradle.internal.reflect.validation;
 
 import org.gradle.api.NonNullApi;
-import org.gradle.api.problems.BasicProblemBuilder;
+import org.gradle.api.problems.internal.BasicProblemBuilder;
 
 import javax.annotation.Nullable;
 
