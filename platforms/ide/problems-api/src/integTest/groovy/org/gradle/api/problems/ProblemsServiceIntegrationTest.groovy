@@ -340,13 +340,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    ProblemReporter reporter = problems.forNamespace("org.example.plugin")
-                    Problem problem = problems.forNamespace("org.example.plugin").create {
+                    problems.forNamespace("org.example.plugin").reporting {
                         it.label("label")
                         .category("type")
                         .solution("solution")
                     }
-                    reporter.report(problem)
                 }
             }
             """
@@ -375,13 +373,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    ProblemReporter reporter = problems.forNamespace("org.example.plugin")
-                    Problem problem = reporter.create {
+                    problems.forNamespace("org.example.plugin").reporting {
                         it.label("label")
                         .category("type")
                         .withException(new RuntimeException("test"))
-                        }
-                    reporter.report(problem)
+                    }
                 }
             }
             """
@@ -409,13 +405,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    ProblemReporter reporter = problems.forNamespace("org.example.plugin")
-                    Problem problem = problems.forNamespace("org.example.plugin").create {
+                    problems.forNamespace("org.example.plugin").reporting {
                         it.label("label")
                         .category("type")
                         .additionalData("key", "value")
-                        }
-                    reporter.report(problem)
+                    }
                 }
             }
             """
@@ -446,13 +440,11 @@ class ProblemsServiceIntegrationTest extends AbstractIntegrationSpec {
 
                 @TaskAction
                 void run() {
-                    ProblemReporter reporter = problems.forNamespace("org.example.plugin")
-                    Problem problem = problems.forNamespace("org.example.plugin").create {
+                    problems.forNamespace("org.example.plugin").reporting {
                         it.label("label")
                         .category("type")
                         .additionalData("key", ["collections", "are", "not", "supported", "yet"])
                     }
-                    reporter.report(problem)
                 }
             }
             """

@@ -60,10 +60,6 @@ public class DefaultProblemCategory implements ProblemCategory, InternalProblemC
         return NAMESPACE_PREFIX_GRADLE_PLUGIN + SEPARATOR + pluginId;
     }
 
-    public int segmentCount() {
-        return subcategories.size() + 2;
-    }
-
     public String toString() {
         return namespace + SEPARATOR + category + CollectionUtils.join(SEPARATOR, subcategories);
     }

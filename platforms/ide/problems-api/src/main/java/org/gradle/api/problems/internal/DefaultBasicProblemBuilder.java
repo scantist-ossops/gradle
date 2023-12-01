@@ -188,7 +188,7 @@ public class DefaultBasicProblemBuilder implements BasicProblemBuilder {
     }
 
     @Override
-    public BasicProblemBuilder category(String category, String... details){
+    public BasicProblemBuilder category(String category, String... details) {
         this.problemCategory = DefaultProblemCategory.create(namespace, category, details);
         return this;
     }
