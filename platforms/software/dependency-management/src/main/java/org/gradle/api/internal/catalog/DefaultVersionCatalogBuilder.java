@@ -484,8 +484,6 @@ public abstract class DefaultVersionCatalogBuilder implements VersionCatalogBuil
                     if (!versionConstraints.keySet().isEmpty()) {
                         configurator.solution("Use one of the following existing versions: " + oxfordListOf(versionConstraints.keySet(), "or"));
                     }
-
-                    return configurator;
                 }));
             } else {
                 return new DependencyModel(group, name, versionRef, model.getVersion(), context);
@@ -515,7 +513,6 @@ public abstract class DefaultVersionCatalogBuilder implements VersionCatalogBuil
                     if (!versionConstraints.keySet().isEmpty()) {
                         configurator.solution("Use one of the following existing versions: " + oxfordListOf(versionConstraints.keySet(), "or"));
                     }
-                    return configurator;
                 }));
             } else {
                 return new PluginModel(id, versionRef, model.getVersion(), context);

@@ -92,12 +92,13 @@ public class LoggingDeprecatedFeatureHandler implements FeatureHandler<Deprecate
             InternalProblemReporter reporter = ((InternalProblems) problemsService).forCore();
             Problem problem = reporter.create(new ProblemBuilderSpec() {
                 @Override
-                public ProblemBuilder apply(ProblemBuilder builder) {
-                    ProblemBuilder problemBuilderDefiningLocation = builder.label(usage.formattedMessage())
+                public void apply(ProblemBuilder builder) {
+                    ProblemBuilder problemBuilder = builder
+                        .label(usage.formattedMessage())
                         .documentedAt(usage.getDocumentationUrl());
-                    return addPossibleLocation(diagnostics, problemBuilderDefiningLocation)
-                        // TODO (donat) we can further categorize deprecation warnings https://github.com/gradle/gradle/issues/26928
-                        .category(CATEGORY_DEPRECATION, TextUtil.screamingSnakeToKebabCase(usage.getType().name()))
+                    addPossibleLocation(diagnostics, problemBuilder);
+                    // TODO (donat) we can further categorize deprecation warnings https://github.com/gradle/gradle/issues/26928
+                    problemBuilder.category(CATEGORY_DEPRECATION, TextUtil.screamingSnakeToKebabCase(usage.getType().name()))
                         .severity(WARNING);
                 }
             });
@@ -106,12 +107,12 @@ public class LoggingDeprecatedFeatureHandler implements FeatureHandler<Deprecate
         fireDeprecatedUsageBuildOperationProgress(usage, diagnostics);
     }
 
-    private static ProblemBuilder addPossibleLocation(ProblemDiagnostics diagnostics, ProblemBuilder genericDeprecation) {
+    private static void addPossibleLocation(ProblemDiagnostics diagnostics, ProblemBuilder genericDeprecation) {
         Location location = diagnostics.getLocation();
         if (location == null) {
-            return genericDeprecation;
+            return;
         }
-        return genericDeprecation.fileLocation(location.getSourceLongDisplayName().getDisplayName(), location.getLineNumber(), null, null);
+        genericDeprecation.fileLocation(location.getSourceLongDisplayName().getDisplayName(), location.getLineNumber(), null, null);
     }
 
     private void maybeLogUsage(DeprecatedFeatureUsage usage, ProblemDiagnostics diagnostics) {

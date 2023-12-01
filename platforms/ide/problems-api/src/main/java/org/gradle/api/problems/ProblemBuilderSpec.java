@@ -42,8 +42,7 @@ public interface ProblemBuilderSpec {
      * Function applying the configuration for the provided object.
      *
      * @param builder The target object
-     * @return The configured object
      * @since 8.6
      */
-    ProblemBuilder apply(ProblemBuilder builder);
+    void apply(ProblemBuilder builder);
 }
