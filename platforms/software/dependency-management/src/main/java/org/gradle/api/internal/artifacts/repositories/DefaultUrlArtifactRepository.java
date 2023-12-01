@@ -21,6 +21,7 @@ import org.gradle.api.InvalidUserDataException;
 import org.gradle.api.artifacts.repositories.UrlArtifactRepository;
 import org.gradle.api.internal.file.FileResolver;
 import org.gradle.internal.deprecation.Documentation;
+import org.gradle.internal.lazy.Lazy;
 import org.gradle.internal.verifier.HttpRedirectVerifier;
 import org.gradle.internal.verifier.HttpRedirectVerifierFactory;
 
@@ -32,7 +33,7 @@ import java.util.function.Supplier;
 
 public class DefaultUrlArtifactRepository implements UrlArtifactRepository {
 
-    private Object url;
+    private Lazy<URI> url;
     private boolean allowInsecureProtocol;
     private final String repositoryType;
     private final FileResolver fileResolver;
@@ -50,17 +51,17 @@ public class DefaultUrlArtifactRepository implements UrlArtifactRepository {
 
     @Override
     public URI getUrl() {
-        return url == null ? null : fileResolver.resolveUri(url);
+        return url == null ? null : url.get();
     }
 
     @Override
     public void setUrl(URI url) {
-        this.url = url;
+        this.url = url == null ? null : Lazy.locking().of(() -> fileResolver.resolveUri(url));
     }
 
     @Override
     public void setUrl(Object url) {
-        this.url = url;
+        this.url = url == null ? null : Lazy.locking().of(() -> fileResolver.resolveUri(url));
     }
 
     @Override
