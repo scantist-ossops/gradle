@@ -21,7 +21,7 @@ import org.gradle.api.Incubating;
 import javax.annotation.Nullable;
 
 /**
- * {@link Problem} instance configurator that is not capable of creating a new Problem instance.
+ * {@link Problem} instance builder that is not capable of creating a new instances.
  *
  * An example of how to use the builder:
  * <pre>{@code
@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
  * @since 8.5
  */
 @Incubating
-public interface ProblemBuilder {
+public interface ProblemBuilder { // TODO (donat) consider renaming it to ProblemConfig or similar // looks better for this: problems.creating(new Action<ProblemConfig>() {...})
 
     /**
      * Declares a short message for this problem.
@@ -112,7 +112,7 @@ public interface ProblemBuilder {
     ProblemBuilder details(String details);
 
     /**
-     * The description of how to solve this problem
+     * The description of how to solve this problem.
      *
      * @param solution the solution.
      * @return this

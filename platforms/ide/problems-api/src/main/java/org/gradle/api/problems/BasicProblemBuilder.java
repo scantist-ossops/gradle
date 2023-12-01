@@ -21,13 +21,12 @@ import org.gradle.api.Incubating;
 import javax.annotation.Nullable;
 
 /**
- * {@link Problem} instance configurator that is capable of creating new Problem instances.
+ * {@link Problem} instance builder that is capable of creating new Problem instances.
  *
  * An example of how to use the builder:
  * <pre>{@code
- *  <problemReporter>.createProblemBuilder()
+ *  <problemReporter>.report(configurator -> configurator
  *          .label("test problem")
- *          .undocumented()
  *          .category("category", "subcategory")
  *          .severity(Severity.ERROR)
  *          .details("this is a test")
@@ -37,7 +36,7 @@ import javax.annotation.Nullable;
  * @since 8.6
  */
 @Incubating
-public interface BasicProblemBuilder extends ProblemBuilder {
+public interface BasicProblemBuilder extends ProblemBuilder { // TODO (donat) should be renamed to ProblemBuilder after the base type rename is done.
 
     /**
      * Creates the new problem. Calling this method won't report the problem via build operations, it can be done separately by calling {@link org.gradle.api.problems.internal.InternalProblemReporter#report(Problem)}.

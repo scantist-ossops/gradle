@@ -37,6 +37,7 @@ import org.gradle.api.Incubating;
 public interface ProblemBuilderSpec {
 
     // TODO (donat) consider changing all Problem API @since annotation to 8.6
+    // TODO (donat) replace it with Action<ProblemBuilder>
 
     /**
      * Function applying the configuration for the provided object.
