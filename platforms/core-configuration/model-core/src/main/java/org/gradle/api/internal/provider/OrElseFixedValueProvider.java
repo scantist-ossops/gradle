@@ -16,16 +16,14 @@
 
 package org.gradle.api.internal.provider;
 
-import org.gradle.internal.Cast;
-
 import javax.annotation.Nullable;
 
 class OrElseFixedValueProvider<T> extends AbstractProviderWithValue<T> {
-    private final ProviderInternal<? extends T> provider;
+    private final GuardedData.GuardedProviderInternal<? extends T> provider;
     private final T fallbackValue;
 
     public OrElseFixedValueProvider(ProviderInternal<? extends T> provider, T fallbackValue) {
-        this.provider = provider;
+        this.provider = guardProvider(provider);
         this.fallbackValue = fallbackValue;
     }
 
@@ -37,17 +35,17 @@ class OrElseFixedValueProvider<T> extends AbstractProviderWithValue<T> {
     @Nullable
     @Override
     public Class<T> getType() {
-        return Cast.uncheckedCast(provider.getType());
+        return getTypeOf(provider);
     }
 
     @Override
     public ValueProducer getProducer() {
-        return new OrElseValueProducer(provider, null, ValueProducer.unknown());
+        return new OrElseValueProducer(this::beginEvaluation, provider, null, ValueProducer.unknown());
     }
 
     @Override
     public ExecutionTimeValue<? extends T> calculateExecutionTimeValue() {
-        ExecutionTimeValue<? extends T> value = provider.calculateExecutionTimeValue();
+        ExecutionTimeValue<? extends T> value = calculateExecutionTimeValueOf(provider);
         if (value.isMissing()) {
             // Use fallback value
             return ExecutionTimeValue.fixedValue(fallbackValue);
@@ -62,7 +60,7 @@ class OrElseFixedValueProvider<T> extends AbstractProviderWithValue<T> {
 
     @Override
     protected Value<? extends T> calculateOwnValue(ValueConsumer consumer) {
-        Value<? extends T> value = provider.calculateValue(consumer);
+        Value<? extends T> value = calculateValueOf(provider, consumer);
         if (value.isMissing()) {
             return Value.of(fallbackValue);
         } else {

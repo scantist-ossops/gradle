@@ -22,11 +22,11 @@ import org.gradle.api.provider.Provider;
 import javax.annotation.Nullable;
 
 public class FlatMapProvider<S, T> extends AbstractMinimalProvider<S> {
-    private final ProviderInternal<? extends T> provider;
+    private final GuardedData.GuardedProviderInternal<? extends T> provider;
     private final Transformer<? extends Provider<? extends S>, ? super T> transformer;
 
     FlatMapProvider(ProviderInternal<? extends T> provider, Transformer<? extends Provider<? extends S>, ? super T> transformer) {
-        this.provider = provider;
+        this.provider = guardProvider(provider);
         this.transformer = transformer;
     }
 
@@ -38,48 +38,51 @@ public class FlatMapProvider<S, T> extends AbstractMinimalProvider<S> {
 
     @Override
     public boolean calculatePresence(ValueConsumer consumer) {
-        return backingProvider(consumer).calculatePresence(consumer);
+        return calculatePresenceOf(backingProvider(consumer), consumer);
     }
 
     @Override
     protected Value<? extends S> calculateOwnValue(ValueConsumer consumer) {
-        Value<? extends T> value = provider.calculateValue(consumer);
+        Value<? extends T> value = calculateValueOf(provider, consumer);
         if (value.isMissing()) {
             return value.asType();
         }
-        return doMapValue(value).calculateValue(consumer);
+        return calculateValueOf(doMapValue(value), consumer);
     }
 
-    private ProviderInternal<? extends S> doMapValue(Value<? extends T> value) {
-        T unpackedValue = value.getWithoutSideEffect();
-        Provider<? extends S> transformedProvider = transformer.transform(unpackedValue);
-        if (transformedProvider == null) {
-            return Providers.notDefined();
+    @SuppressWarnings("try") // We use try-with-resources for side effects
+    private GuardedData.GuardedProviderInternal<? extends S> doMapValue(Value<? extends T> value) {
+        try (EvaluationContext.ScopeContext ignored = beginEvaluation()) {
+            T unpackedValue = value.getWithoutSideEffect();
+            Provider<? extends S> transformedProvider = transformer.transform(unpackedValue);
+            if (transformedProvider == null) {
+                return guardProvider(Providers.notDefined());
+            }
+
+            // Note, that the potential side effect of the transformed provider
+            // is going to be executed before this fixed side effect.
+            // It is not possible to preserve linear execution order in the general case,
+            // as the transformed provider can have side effects hidden under other wrapping providers.
+            return guardProvider(Providers.internal(transformedProvider).withSideEffect(SideEffect.fixedFrom(value)));
         }
-
-        // Note, that the potential side effect of the transformed provider
-        // is going to be executed before this fixed side effect.
-        // It is not possible to preserve linear execution order in the general case,
-        // as the transformed provider can have side effects hidden under other wrapping providers.
-        return Providers.internal(transformedProvider).withSideEffect(SideEffect.fixedFrom(value));
     }
 
-    private ProviderInternal<? extends S> backingProvider(ValueConsumer consumer) {
-        Value<? extends T> value = provider.calculateValue(consumer);
+    private GuardedData.GuardedProviderInternal<? extends S> backingProvider(ValueConsumer consumer) {
+        Value<? extends T> value = calculateValueOf(provider, consumer);
         if (value.isMissing()) {
-            return Providers.notDefined();
+            return guardProvider(Providers.notDefined());
         }
         return doMapValue(value);
     }
 
     @Override
     public ValueProducer getProducer() {
-        return backingProvider(ValueConsumer.IgnoreUnsafeRead).getProducer();
+        return getProducerOf(backingProvider(ValueConsumer.IgnoreUnsafeRead));
     }
 
     @Override
     public ExecutionTimeValue<? extends S> calculateExecutionTimeValue() {
-        return backingProvider(ValueConsumer.IgnoreUnsafeRead).calculateExecutionTimeValue();
+        return calculateExecutionTimeValueOf(backingProvider(ValueConsumer.IgnoreUnsafeRead));
     }
 
     @Override

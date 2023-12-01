@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 the original author or authors.
+ * Copyright 2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,11 @@
 
 package org.gradle.api.internal.provider;
 
-import java.util.Collection;
+public interface GuardedData<T> {
+    T get(EvaluationContext.ScopeContext context);
 
-interface CollectionSupplier<T, C extends Collection<? extends T>> extends ValueSupplier, GuardedData<CollectionSupplier<T, C>> {
-    Value<? extends C> calculateValue(ValueConsumer consumer);
+    T unsafeGet();
 
-    CollectionSupplier<T, C> plus(Collector<T> collector);
-
-    ExecutionTimeValue<? extends C> calculateExecutionTimeValue();
-
-    @Override
-    default CollectionSupplier<T, C> get(EvaluationContext.ScopeContext context) {
-        return this;
-    }
-
-    @Override
-    default CollectionSupplier<T, C> unsafeGet() {
-        return this;
+    abstract class GuardedProviderInternal<T> implements GuardedData<ProviderInternal<T>> {
     }
 }

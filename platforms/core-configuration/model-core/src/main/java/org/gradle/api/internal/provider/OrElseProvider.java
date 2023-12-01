@@ -19,12 +19,12 @@ package org.gradle.api.internal.provider;
 import javax.annotation.Nullable;
 
 class OrElseProvider<T> extends AbstractMinimalProvider<T> {
-    private final ProviderInternal<T> left;
-    private final ProviderInternal<? extends T> right;
+    private final GuardedData.GuardedProviderInternal<T> left;
+    private final GuardedData.GuardedProviderInternal<? extends T> right;
 
     public OrElseProvider(ProviderInternal<T> left, ProviderInternal<? extends T> right) {
-        this.left = left;
-        this.right = right;
+        this.left = guardProvider(left);
+        this.right = guardProvider(right);
     }
 
     @Override
@@ -35,27 +35,27 @@ class OrElseProvider<T> extends AbstractMinimalProvider<T> {
     @Nullable
     @Override
     public Class<T> getType() {
-        return left.getType();
+        return getTypeOf(left);
     }
 
     @Override
     public ValueProducer getProducer() {
-        return new OrElseValueProducer(left, right, right.getProducer());
+        return new OrElseValueProducer(this::beginEvaluation, left, right, getProducerOf(right));
     }
 
     @Override
     public boolean calculatePresence(ValueConsumer consumer) {
-        return left.calculatePresence(consumer) || right.calculatePresence(consumer);
+        return calculatePresenceOf(left, consumer) || calculatePresenceOf(right, consumer);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public ExecutionTimeValue<? extends T> calculateExecutionTimeValue() {
-        ExecutionTimeValue<? extends T> leftValue = left.calculateExecutionTimeValue();
+        ExecutionTimeValue<? extends T> leftValue = calculateExecutionTimeValueOf(left);
         if (leftValue.hasFixedValue()) {
             return leftValue;
         }
-        ExecutionTimeValue<? extends T> rightValue = right.calculateExecutionTimeValue();
+        ExecutionTimeValue<? extends T> rightValue = calculateExecutionTimeValueOf(right);
         if (leftValue.isMissing()) {
             return rightValue;
         }
@@ -73,11 +73,11 @@ class OrElseProvider<T> extends AbstractMinimalProvider<T> {
 
     @Override
     protected Value<? extends T> calculateOwnValue(ValueConsumer consumer) {
-        Value<? extends T> leftValue = left.calculateValue(consumer);
+        Value<? extends T> leftValue = calculateValueOf(left, consumer);
         if (!leftValue.isMissing()) {
             return leftValue;
         }
-        Value<? extends T> rightValue = right.calculateValue(consumer);
+        Value<? extends T> rightValue = calculateValueOf(right, consumer);
         if (!rightValue.isMissing()) {
             return rightValue;
         }

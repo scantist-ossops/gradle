@@ -20,19 +20,29 @@ import org.gradle.api.Action;
 import org.gradle.api.Task;
 
 import javax.annotation.Nullable;
+import java.util.function.Supplier;
 
 class OrElseValueProducer implements ValueSupplier.ValueProducer {
 
-    private final ProviderInternal<?> left;
+    private final Supplier<EvaluationContext.ScopeContext> scopeOwner;
+    private final GuardedData.GuardedProviderInternal<?> left;
     @Nullable
-    private final ProviderInternal<?> right;
+    private final GuardedData.GuardedProviderInternal<?> right;
     private final ValueSupplier.ValueProducer leftProducer;
     private final ValueSupplier.ValueProducer rightProducer;
 
-    public OrElseValueProducer(ProviderInternal<?> left, @Nullable ProviderInternal<?> right, ValueSupplier.ValueProducer rightProducer) {
+    public OrElseValueProducer(
+        Supplier<EvaluationContext.ScopeContext> scopeOwner,
+        GuardedData.GuardedProviderInternal<?> left,
+        @Nullable GuardedData.GuardedProviderInternal<?> right,
+        ValueSupplier.ValueProducer rightProducer
+    ) {
+        this.scopeOwner = scopeOwner;
         this.left = left;
         this.right = right;
-        this.leftProducer = left.getProducer();
+        try (EvaluationContext.ScopeContext context = scopeOwner.get()) {
+            this.leftProducer = left.get(context).getProducer();
+        }
         this.rightProducer = rightProducer;
     }
 
@@ -55,7 +65,9 @@ class OrElseValueProducer implements ValueSupplier.ValueProducer {
         }
     }
 
-    private boolean isMissing(ProviderInternal<?> provider) {
-        return provider.calculateExecutionTimeValue().isMissing();
+    private boolean isMissing(GuardedData.GuardedProviderInternal<?> provider) {
+        try (EvaluationContext.ScopeContext context = scopeOwner.get()) {
+            return provider.get(context).calculateExecutionTimeValue().isMissing();
+        }
     }
 }

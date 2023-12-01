@@ -19,7 +19,7 @@ package org.gradle.api.internal.provider;
 import java.util.Map;
 import java.util.Set;
 
-interface MapSupplier<K, V> extends ValueSupplier {
+interface MapSupplier<K, V> extends ValueSupplier, GuardedData<MapSupplier<K, V>> {
     Value<? extends Map<K, V>> calculateValue(ValueConsumer consumer);
 
     Value<? extends Set<K>> calculateKeys(ValueConsumer consumer);
@@ -27,4 +27,14 @@ interface MapSupplier<K, V> extends ValueSupplier {
     MapSupplier<K, V> plus(MapCollector<K, V> collector);
 
     ExecutionTimeValue<? extends Map<K, V>> calculateOwnExecutionTimeValue();
+
+    @Override
+    default MapSupplier<K, V> get(EvaluationContext.ScopeContext context) {
+        return this;
+    }
+
+    @Override
+    default MapSupplier<K, V> unsafeGet() {
+        return this;
+    }
 }

@@ -67,8 +67,9 @@ public class DefaultProvider<T> extends AbstractMinimalProvider<T> {
     }
 
     @Override
+    @SuppressWarnings("try") // We use try-with-resources for side effects
     protected Value<? extends T> calculateOwnValue(ValueConsumer consumer) {
-        try {
+        try (EvaluationContext.ScopeContext ignored = beginEvaluation()) {
             return Value.ofNullable(value.call());
         } catch (Exception e) {
             throw UncheckedException.throwAsUncheckedException(e);

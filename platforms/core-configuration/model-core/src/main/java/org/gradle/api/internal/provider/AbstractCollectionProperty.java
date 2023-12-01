@@ -51,6 +51,11 @@ public abstract class AbstractCollectionProperty<T, C extends Collection<T>> ext
         init(defaultValue, noValueSupplier());
     }
 
+    @Override
+    protected GuardedData<CollectionSupplier<T, C>> guardSupplier(CollectionSupplier<T, C> data) {
+        return data;
+    }
+
     private CollectionSupplier<T, C> emptySupplier() {
         return new EmptySupplier();
     }
@@ -99,7 +104,7 @@ public abstract class AbstractCollectionProperty<T, C extends Collection<T>> ext
 
     private void addCollector(Collector<T> collector) {
         assertCanMutate();
-        setSupplier(getExplicitValue(defaultValue).plus(collector));
+        setSupplier(getExplicitValue(defaultValue).unsafeGet().plus(collector));
     }
 
     @Nullable

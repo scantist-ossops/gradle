@@ -35,6 +35,11 @@ public class DefaultProperty<T> extends AbstractProperty<T, ProviderInternal<? e
     }
 
     @Override
+    protected final GuardedData<ProviderInternal<? extends T>> guardSupplier(ProviderInternal<? extends T> data) {
+        return Cast.uncheckedCast(data);
+    }
+
+    @Override
     public Object unpackState() {
         return getProvider();
     }
@@ -85,7 +90,7 @@ public class DefaultProperty<T> extends AbstractProperty<T, ProviderInternal<? e
     }
 
     public ProviderInternal<? extends T> getProvider() {
-        return getSupplier();
+        return getSupplier().unsafeGet();
     }
 
     public DefaultProperty<T> provider(Provider<? extends T> provider) {

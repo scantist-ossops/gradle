@@ -17,6 +17,7 @@
 package org.gradle.api.internal.provider;
 
 import org.gradle.api.Transformer;
+import org.gradle.api.internal.provider.EvaluationContext.ScopeContext;
 import org.gradle.api.internal.tasks.TaskDependencyResolveContext;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.specs.Spec;
@@ -32,7 +33,7 @@ import javax.annotation.Nullable;
 /**
  * A partial {@link Provider} implementation. Subclasses must implement {@link ProviderInternal#getType()} and {@link AbstractMinimalProvider#calculateOwnValue(ValueConsumer)}.
  */
-public abstract class AbstractMinimalProvider<T> implements ProviderInternal<T>, Managed {
+public abstract class AbstractMinimalProvider<T> extends GuardedData.GuardedProviderInternal<T> implements ProviderInternal<T>, Managed {
     private static final DisplayName DEFAULT_DISPLAY_NAME = Describables.of("this provider");
 
     @Override
@@ -216,5 +217,58 @@ public abstract class AbstractMinimalProvider<T> implements ProviderInternal<T>,
         // NOTE: Do not realize the value of the Provider in toString().  The debugger will try to call this method and make debugging really frustrating.
         Class<?> type = getType();
         return String.format("provider(%s)", type == null ? "?" : type.getName());
+    }
+
+    @Override
+    public final ProviderInternal<T> get(EvaluationContext.ScopeContext context) {
+        return this;
+    }
+
+    @Override
+    public final ProviderInternal<T> unsafeGet() {
+        return this;
+    }
+
+    protected final ScopeContext beginEvaluation() {
+        return EvaluationContext.current().enter(this);
+    }
+
+    protected final <V> GuardedData.GuardedProviderInternal<V> guardProvider(ProviderInternal<V> providerInternal) {
+        return Cast.uncheckedCast(providerInternal);
+    }
+
+    protected final ValueProducer getProducerOf(GuardedData.GuardedProviderInternal<?> supplier) {
+        try (ScopeContext context = beginEvaluation()) {
+            return supplier.get(context).getProducer();
+        }
+    }
+
+    protected final boolean calculatePresenceOf(GuardedData.GuardedProviderInternal<?> supplier, ValueConsumer consumer) {
+        try (ScopeContext context = beginEvaluation()) {
+            return supplier.get(context).calculatePresence(consumer);
+        }
+    }
+
+    protected final <V> Value<? extends V> calculateValueOf(GuardedData.GuardedProviderInternal<? extends V> provider, ValueConsumer consumer) {
+        try (ScopeContext context = beginEvaluation()) {
+            return provider.get(context).calculateValue(consumer);
+        }
+    }
+
+    protected final <V> ExecutionTimeValue<? extends V> calculateExecutionTimeValueOf(GuardedData.GuardedProviderInternal<? extends V> provider) {
+        try (ScopeContext context = beginEvaluation()) {
+            return provider.get(context).calculateExecutionTimeValue();
+        }
+    }
+
+    @Nullable
+    protected final <V> Class<V> getTypeOf(GuardedData.GuardedProviderInternal<? extends V> provider) {
+        return Cast.uncheckedCast(provider.unsafeGet().getType());
+    }
+
+    protected final <V> ProviderInternal<? extends V> withFinalValueOf(GuardedData<? extends ProviderInternal<V>> provider, ValueConsumer consumer) {
+        try (ScopeContext context = beginEvaluation()) {
+            return provider.get(context).withFinalValue(consumer);
+        }
     }
 }

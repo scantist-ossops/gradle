@@ -36,20 +36,22 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
     private ModelObject producer;
     private DisplayName displayName;
     private FinalizationState<S> state;
-    private S value;
+    private GuardedData<S> value;
 
     public AbstractProperty(PropertyHost host) {
         state = new NonFinalizedValue<>(host);
     }
 
     protected void init(S initialValue, S convention) {
-        this.value = initialValue;
+        this.value = guardSupplier(initialValue);
         this.state.setConvention(convention);
     }
 
     protected void init(S initialValue) {
         init(initialValue, initialValue);
     }
+
+    protected abstract GuardedData<S> guardSupplier(S data);
 
     /**
      * A simple getter that checks if this property has been finalized.
@@ -63,8 +65,8 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
     @Override
     public boolean calculatePresence(ValueConsumer consumer) {
         beforeRead(producer, consumer);
-        try {
-            return getSupplier().calculatePresence(consumer);
+        try (EvaluationContext.ScopeContext context = beginEvaluation()) {
+            return getSupplier().get(context).calculatePresence(consumer);
         } catch (Exception e) {
             if (displayName != null) {
                 throw new PropertyQueryException(String.format("Failed to query the value of %s.", displayName), e);
@@ -121,7 +123,7 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
         }
     }
 
-    protected S getSupplier() {
+    protected GuardedData<S> getSupplier() {
         return value;
     }
 
@@ -138,8 +140,8 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
 
     @Nonnull
     private Value<? extends T> doCalculateValue(ValueConsumer consumer) {
-        try {
-            return calculateValueFrom(value, consumer);
+        try (EvaluationContext.ScopeContext context = beginEvaluation()) {
+            return calculateValueFrom(value.get(context), consumer);
         } catch (Exception e) {
             if (displayName != null) {
                 throw new PropertyQueryException(String.format("Failed to query the value of %s.", displayName), e);
@@ -153,7 +155,10 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
 
     @Override
     public ExecutionTimeValue<? extends T> calculateExecutionTimeValue() {
-        ExecutionTimeValue<? extends T> value = calculateOwnExecutionTimeValue(this.value);
+        ExecutionTimeValue<? extends T> value;
+        try(EvaluationContext.ScopeContext context = beginEvaluation()) {
+            value = calculateOwnExecutionTimeValue(this.value.get(context));
+        }
         if (getProducerTask() == null) {
             return value;
         } else {
@@ -184,7 +189,9 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
         if (task != null) {
             return ValueProducer.task(task);
         } else {
-            return getSupplier().getProducer();
+            try (EvaluationContext.ScopeContext context = beginEvaluation()) {
+                return getSupplier().get(context).getProducer();
+            }
         }
     }
 
@@ -219,12 +226,12 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
 
     protected void setSupplier(S supplier) {
         assertCanMutate();
-        this.value = state.explicitValue(supplier);
+        this.value = guardSupplier(state.explicitValue(supplier));
     }
 
     protected void setConvention(S convention) {
         assertCanMutate();
-        this.value = state.applyConvention(value, convention);
+        this.value = guardSupplier(state.applyConvention(value.unsafeGet(), convention));
     }
 
     /**
@@ -241,8 +248,8 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
     }
 
     private void finalizeNow(ValueConsumer consumer) {
-        try {
-            value = finalValue(value, state.forUpstream(consumer));
+        try (EvaluationContext.ScopeContext context = beginEvaluation()) {
+            value = guardSupplier(finalValue(value.get(context), state.forUpstream(consumer)));
         } catch (Exception e) {
             if (displayName != null) {
                 throw new PropertyQueryException(String.format("Failed to calculate the value of %s.", displayName), e);
@@ -256,8 +263,8 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
     /**
      * Returns the current value of this property, if explicitly defined, otherwise the given default. Does not apply the convention.
      */
-    protected S getExplicitValue(S defaultValue) {
-        return state.explicitValue(value, defaultValue);
+    protected GuardedData<S> getExplicitValue(S defaultValue) {
+        return guardSupplier(state.explicitValue(value.unsafeGet(), defaultValue));
     }
 
     /**
@@ -265,7 +272,7 @@ public abstract class AbstractProperty<T, S extends ValueSupplier> extends Abstr
      */
     protected void discardValue() {
         assertCanMutate();
-        value = state.implicitValue();
+        value = guardSupplier(state.implicitValue());
     }
 
     protected void assertCanMutate() {

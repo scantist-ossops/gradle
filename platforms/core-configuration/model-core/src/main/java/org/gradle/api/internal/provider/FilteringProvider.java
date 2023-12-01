@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
  **/
 public class FilteringProvider<T> extends AbstractMinimalProvider<T> {
 
-    protected final ProviderInternal<T> provider;
+    protected final GuardedData.GuardedProviderInternal<T> provider;
     protected final Spec<? super T> spec;
 
     public FilteringProvider(
@@ -35,23 +35,23 @@ public class FilteringProvider<T> extends AbstractMinimalProvider<T> {
         Spec<? super T> spec
     ) {
         this.spec = spec;
-        this.provider = provider;
+        this.provider = guardProvider(provider);
     }
 
     @Nullable
     @Override
     public Class<T> getType() {
-        return provider.getType();
+        return getTypeOf(provider);
     }
 
     @Override
     public ValueProducer getProducer() {
-        return provider.getProducer();
+        return getProducerOf(provider);
     }
 
     @Override
     public ExecutionTimeValue<? extends T> calculateExecutionTimeValue() {
-        ExecutionTimeValue<? extends T> value = provider.calculateExecutionTimeValue();
+        ExecutionTimeValue<? extends T> value = calculateExecutionTimeValueOf(provider);
         if (value.isMissing()) {
             return value;
         }
@@ -67,25 +67,28 @@ public class FilteringProvider<T> extends AbstractMinimalProvider<T> {
     @Override
     protected Value<? extends T> calculateOwnValue(ValueConsumer consumer) {
         beforeRead();
-        Value<? extends T> value = provider.calculateValue(consumer);
+        Value<? extends T> value = calculateValueOf(provider, consumer);
         return filterValue(value);
     }
 
     @Nonnull
+    @SuppressWarnings("try") // We use try-with-resources for side effects
     protected Value<? extends T> filterValue(Value<? extends T> value) {
         if (value.isMissing()) {
             return value.asType();
         }
         T unpackedValue = value.getWithoutSideEffect();
-        if (spec.isSatisfiedBy(unpackedValue)) {
-            return value;
-        } else {
-            return Value.missing();
+        try (EvaluationContext.ScopeContext ignored = beginEvaluation()) {
+            if (spec.isSatisfiedBy(unpackedValue)) {
+                return value;
+            } else {
+                return Value.missing();
+            }
         }
     }
 
     protected void beforeRead() {
-        provider.getProducer().visitContentProducerTasks(producer -> {
+        getProducer().visitContentProducerTasks(producer -> {
             if (!producer.getState().getExecuted()) {
                 throw new InvalidUserCodeException(
                     String.format("Querying the filtered value of %s before %s has completed is not supported", provider, producer)

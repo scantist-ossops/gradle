@@ -63,6 +63,11 @@ public class DefaultMapProperty<K, V> extends AbstractProperty<Map<K, V>, MapSup
         return uncheckedCast(NO_VALUE);
     }
 
+    @Override
+    protected GuardedData<MapSupplier<K, V>> guardSupplier(MapSupplier<K, V> data) {
+        return data;
+    }
+
     @Nullable
     @Override
     @SuppressWarnings("unchecked")
@@ -176,7 +181,7 @@ public class DefaultMapProperty<K, V> extends AbstractProperty<Map<K, V>, MapSup
 
     private void addCollector(MapCollector<K, V> collector) {
         assertCanMutate();
-        setSupplier(getExplicitValue(defaultValue).plus(collector));
+        setSupplier(getExplicitValue(defaultValue).unsafeGet().plus(collector));
     }
 
     @SuppressWarnings("unchecked")
@@ -294,7 +299,9 @@ public class DefaultMapProperty<K, V> extends AbstractProperty<Map<K, V>, MapSup
         @Override
         protected Value<? extends Set<K>> calculateOwnValue(ValueConsumer consumer) {
             beforeRead(consumer);
-            return getSupplier().calculateKeys(consumer);
+            try (EvaluationContext.ScopeContext context = DefaultMapProperty.this.beginEvaluation()) {
+                return getSupplier().get(context).calculateKeys(consumer);
+            }
         }
     }
 
