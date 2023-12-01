@@ -34,7 +34,7 @@ public class EvaluationContext {
 
     private static final EvaluationContext INSTANCE = new EvaluationContext();
 
-    private final ThreadLocal<ScopeContext> threadLocalContext = ThreadLocal.withInitial(() -> new PerThreadContext(null));
+    private final ThreadLocal<ScopeContextInternal> threadLocalContext = ThreadLocal.withInitial(() -> new PerThreadContext(null));
 
     // TODO(mlopatkin) Replace with injection.
     public static EvaluationContext current() {
@@ -104,18 +104,27 @@ public class EvaluationContext {
         }
     }
 
-    private ScopeContext getContext() {
+    private ScopeContextInternal getContext() {
         return threadLocalContext.get();
     }
 
-    private ScopeContext setContext(ScopeContext newContext) {
+    private ScopeContextInternal setContext(ScopeContextInternal newContext) {
         threadLocalContext.set(newContext);
 
         return newContext;
     }
 
-    private abstract class ScopeContext implements AutoCloseable {
-        public ScopeContext enter(ProviderInternal<?> owner) {
+    public interface ScopeContext extends AutoCloseable {
+        @Override
+        void close();
+    }
+
+    public ScopeContext enter(ProviderInternal<?> provider) {
+        return getContext().enter(provider);
+    }
+
+    private abstract class ScopeContextInternal implements ScopeContext {
+        public ScopeContextInternal enter(ProviderInternal<?> owner) {
             PerThreadContext newContext = new PerThreadContext(this);
             newContext.push(owner);
             return setContext(newContext);
@@ -132,15 +141,15 @@ public class EvaluationContext {
             setContext(this);
         }
 
-        public ScopeContext nested() {
+        public ScopeContextInternal nested() {
             return setContext(new NestedEvaluationContext(this));
         }
     }
 
-    private final class NestedEvaluationContext extends ScopeContext {
-        private final ScopeContext parent;
+    private final class NestedEvaluationContext extends ScopeContextInternal {
+        private final ScopeContextInternal parent;
 
-        public NestedEvaluationContext(ScopeContext parent) {
+        public NestedEvaluationContext(ScopeContextInternal parent) {
             this.parent = parent;
         }
 
@@ -150,13 +159,13 @@ public class EvaluationContext {
         }
     }
 
-    private final class PerThreadContext extends ScopeContext {
+    private final class PerThreadContext extends ScopeContextInternal {
         private final Set<ProviderInternal<?>> providersInScope = new HashSet<>();
         private final List<ProviderInternal<?>> providersStack = new ArrayList<>(16);
         @Nullable
-        private final ScopeContext parent;
+        private final ScopeContextInternal parent;
 
-        public PerThreadContext(@Nullable ScopeContext parent) {
+        public PerThreadContext(@Nullable ScopeContextInternal parent) {
             this.parent = parent;
         }
 
@@ -174,7 +183,7 @@ public class EvaluationContext {
         }
 
         @Override
-        public ScopeContext enter(ProviderInternal<?> owner) {
+        public ScopeContextInternal enter(ProviderInternal<?> owner) {
             push(owner);
             return this;
         }
@@ -223,8 +232,8 @@ public class EvaluationContext {
         }
 
         @SuppressWarnings("try") // We use try-with-resources for side effects
-        private static String formatEvaluationChain(ScopeContext context, List<ProviderInternal<?>> evaluationCycle) {
-            try (ScopeContext ignored = context.nested()) {
+        private static String formatEvaluationChain(ScopeContextInternal context, List<ProviderInternal<?>> evaluationCycle) {
+            try (ScopeContextInternal ignored = context.nested()) {
                 return evaluationCycle.stream()
                     .map(CircularEvaluationException::safeToString)
                     .collect(Collectors.joining("\n -> "));
