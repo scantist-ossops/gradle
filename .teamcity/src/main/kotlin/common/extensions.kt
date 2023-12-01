@@ -112,6 +112,10 @@ fun BuildType.applyDefaultSettings(os: Os = Os.LINUX, arch: Arch = Arch.AMD64, b
     """.trimIndent()
 
     paramsForBuildToolBuild(buildJvm, os, arch)
+    params {
+        // The promotion job doesn't have a branch, so %teamcity.build.branch% doesn't work.
+        param("env.BUILD_BRANCH", "%teamcity.build.branch%")
+    }
 
     vcs {
         root(AbsoluteId(VersionedSettingsBranch.fromDslContext().vcsRootId()))
