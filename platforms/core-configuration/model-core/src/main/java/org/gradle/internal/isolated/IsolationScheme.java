@@ -102,6 +102,20 @@ public class IsolationScheme<IMPLEMENTATION, PARAMS> {
                 }
             }
         }
+        Class<? super T> superClass = implementationType.getSuperclass();
+        if (superClass != null) {
+            for (Type superType : superClass.getGenericInterfaces()) {
+                if (superType instanceof ParameterizedType) {
+                    ParameterizedType parameterizedSuperType = (ParameterizedType) superType;
+                    if (parameterizedSuperType.getRawType().equals(interfaceType)) {
+                        Type argument = parameterizedSuperType.getActualTypeArguments()[typeArgumentIndex];
+                        if (argument instanceof Class) {
+                            return Cast.uncheckedCast(argument);
+                        }
+                    }
+                }
+            }
+        }
         ParameterizedType superType = (ParameterizedType) TypeToken.of(implementationType).getSupertype(interfaceType).getType();
         return Cast.uncheckedNonnullCast(TypeToken.of(superType.getActualTypeArguments()[typeArgumentIndex]).getRawType());
     }
