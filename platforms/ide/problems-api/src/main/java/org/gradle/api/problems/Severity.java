@@ -38,8 +38,4 @@ public enum Severity {
     public String toString() {
         return displayName;
     }
-
-    public boolean isWarning() {
-        return this == WARNING;
-    }
 }

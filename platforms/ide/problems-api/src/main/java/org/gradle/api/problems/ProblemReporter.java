@@ -28,15 +28,19 @@ public interface ProblemReporter {
 
     /**
      * Configures and reports a new problem.
+     * <p>
+     * The spec must specify the problem label and the category. Any additional configuration is optional.
      *
-     * @param action the problem configuration
+     * @param spec the problem configuration
      */
-    void reporting(ProblemBuilderSpec action);
+    void reporting(ProblemBuilderSpec spec);
 
     /**
      * Configures a new problem, reports it, and uses it to throw a new exception.
      * <p>
      * An exception must be provided in the spec.
+     * <p>
+     * The spec must specify the exception, the problem label, and the category. Any additional configuration is optional.
      *
      * @return nothing, the method throws an exception
      */
@@ -45,6 +49,7 @@ public interface ProblemReporter {
     /**
      * Configures a new problem using an existing exception as input, reports it, and uses it to throw a new exception.
      * <p>
+     * The spec must specify the problem label and the category. Any additional configuration is optional.
      *
      * @return nothing, the method throws an exception
      */

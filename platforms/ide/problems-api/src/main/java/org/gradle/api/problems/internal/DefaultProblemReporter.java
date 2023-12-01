@@ -17,7 +17,6 @@
 package org.gradle.api.problems.internal;
 
 import org.gradle.api.problems.Problem;
-import org.gradle.api.problems.ProblemBuilder;
 import org.gradle.api.problems.ProblemBuilderSpec;
 
 import java.util.List;
@@ -35,17 +34,17 @@ public class DefaultProblemReporter implements InternalProblemReporter {
     }
 
     @Override
-    public void reporting(ProblemBuilderSpec action) {
-        DefaultBasicProblemBuilder defaultProblemBuilder = createProblemBuilder();
-        action.apply(defaultProblemBuilder);
-        report(defaultProblemBuilder.build());
+    public void reporting(ProblemBuilderSpec spec) {
+        DefaultBasicProblemBuilder problemBuilder = createProblemBuilder();
+        spec.apply(problemBuilder);
+        report(problemBuilder.build());
     }
 
     @Override
     public RuntimeException throwing(ProblemBuilderSpec spec) {
-        DefaultBasicProblemBuilder defaultProblemBuilder = createProblemBuilder();
-        spec.apply(defaultProblemBuilder);
-        Problem problem = defaultProblemBuilder.build();
+        DefaultBasicProblemBuilder problemBuilder = createProblemBuilder();
+        spec.apply(problemBuilder);
+        Problem problem = problemBuilder.build();
         // TODO (donat) throw an IllegalStateException if problem.getException() is null
         throw throwError(problem.getException(), problem);
     }
@@ -57,10 +56,10 @@ public class DefaultProblemReporter implements InternalProblemReporter {
 
     @Override
     public RuntimeException rethrowing(RuntimeException e, ProblemBuilderSpec spec) {
-        DefaultBasicProblemBuilder defaultProblemBuilder = createProblemBuilder();
-        ProblemBuilder problemBuilder = spec.apply(defaultProblemBuilder);
+        DefaultBasicProblemBuilder problemBuilder = createProblemBuilder();
+        spec.apply(problemBuilder);
         problemBuilder.withException(e);
-        throw throwError(e, defaultProblemBuilder.build());
+        throw throwError(e, problemBuilder.build());
     }
 
     @Override

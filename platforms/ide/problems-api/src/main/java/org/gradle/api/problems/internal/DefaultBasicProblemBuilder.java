@@ -75,8 +75,15 @@ public class DefaultBasicProblemBuilder implements BasicProblemBuilder {
 
     @Override
     public Problem build() {
+        // TODO (donat) can we use the fields directly in this method?
+        // TODO (donat) add test coverage
+        if (label == null) {
+            throw new IllegalStateException("Label must be specified");
+        } else if (problemCategory == null) {
+            throw new IllegalStateException("Category must be specified");
+        }
         return new DefaultProblem(
-            getLabel(),
+            label,
             getSeverity(getSeverity()),
             getLocations(),
             getDocLink(),
