@@ -27,7 +27,7 @@ import org.gradle.util.Path;
 @Incubating
 public class TaskPathLocation implements ProblemLocation {
 
-    private final Path identityPath;
+    private final Path identityPath; // TODO (donat) rename it to buildTreePath here and in the Tooling API as well.
 
     public TaskPathLocation(Path identityPath) {
         this.identityPath = identityPath;
