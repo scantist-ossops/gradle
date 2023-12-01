@@ -29,6 +29,8 @@ public class DefaultProblems implements InternalProblems {
     private ProblemEmitter emitter;
     private final List<ProblemTransformer> transformers;
 
+    private final InternalProblemReporter internalReporter;
+
     public DefaultProblems(ProblemEmitter emitter) {
         this(emitter, Collections.<ProblemTransformer>emptyList());
     }
@@ -36,6 +38,7 @@ public class DefaultProblems implements InternalProblems {
     public DefaultProblems(ProblemEmitter emitter, List<ProblemTransformer> transformers) {
         this.emitter = emitter;
         this.transformers = transformers;
+        internalReporter = crateReporter(DefaultProblemCategory.getCoreNamespace(), emitter, transformers);
     }
 
     public void setEmitter(ProblemEmitter emitter) {
@@ -44,14 +47,15 @@ public class DefaultProblems implements InternalProblems {
 
     @Override
     public ProblemReporter forNamespace(String namespace) {
-        if (namespace.equals(DefaultProblemCategory.getCoreNamespace())) {
-            throw new RuntimeException("Cannot use '" + DefaultProblemCategory.getCoreNamespace() + "' as namespace");
-        }
-        return new DefaultProblemReporter(emitter, transformers, DefaultProblemCategory.getPluginNamespace(namespace));
+        return crateReporter(DefaultProblemCategory.getPluginNamespace(namespace), emitter, transformers);
+    }
+
+    private static DefaultProblemReporter crateReporter(String namespace, ProblemEmitter emitter, List<ProblemTransformer> transformers) {
+        return new DefaultProblemReporter(emitter, transformers, namespace);
     }
 
     @Override
     public InternalProblemReporter forCoreNamespace() {
-        return new DefaultProblemReporter(emitter, transformers, DefaultProblemCategory.getCoreNamespace());
+        return internalReporter;
     }
 }

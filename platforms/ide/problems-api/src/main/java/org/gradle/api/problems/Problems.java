@@ -25,7 +25,7 @@ import org.gradle.internal.service.scopes.ServiceScope;
  * <p>
  * The main purpose of this API is to allow clients to create configure and report problems in a centralized way.
  * <p>
- * Reported problems are exposed via build operation progress events, which then be converted to Tooling API progress events.
+ * Reported problems are exposed via build operation progress events, which then are converted to Tooling API progress events.
  *
  * @since 8.4
  */
@@ -36,12 +36,12 @@ public interface Problems {
     /**
      * Return a problem reporter for a particular namespace.
      * <p>
-     * A namespace isolates similar problem reports from different origins.
-     * <p>
      * The recommendation is to use the plugin ID as the namespace.
+     * The namespace will be part of the category of the reported problems.
+     *
      *
      * @return The problem reporter.
-     * @see ProblemCategory#getNamespace()
+     * @see ProblemCategory
      * @since 8.6
      */
     ProblemReporter forNamespace(String namespace);

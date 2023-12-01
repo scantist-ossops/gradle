@@ -27,6 +27,7 @@ public class DefaultProblemProgressDetails implements ProblemProgressDetails {
     }
 
     public Problem getProblem() {
+        // TODO (donat) we should only have an interface in the enterprise-operations package if the scans plugin consume it.
         return problem;
     }
 }

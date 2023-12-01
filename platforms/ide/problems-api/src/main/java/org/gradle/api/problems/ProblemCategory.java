@@ -31,7 +31,7 @@ import java.util.List;
  *     <li>subcategories</li>
  * </ul>
  * <p>
- * The namespace isolates problems emitted by Gradle core and by different plugins. The values should follow the following pattern:
+ * The namespace denotes which component emitted the problem. It can be either Gradle core or a third-party plugin. The values should use the following pattern:
  * <ul>
  *     <li>Gradle core: {@code gradle}</li>
  *     <li>Plugins: {@code gradle-plugin:<plugin-id>}</li>
@@ -52,9 +52,24 @@ import java.util.List;
 @Incubating
 public interface ProblemCategory {
 
+    /**
+     * The namespace.
+     *
+     * @return The namespace.
+     */
     String getNamespace();
 
+    /**
+     * The main category.
+     *
+     * @return The main categories.
+     */
     String getCategory();
 
+    /**
+     * The optional subcategories.
+     *
+     * @return The subcategories.
+     */
     List<String> getSubCategories();
 }

@@ -69,7 +69,7 @@ public class DefaultProblemReporter implements InternalProblemReporter {
         return defaultProblemBuilder.build();
     }
 
-    @Override
+    // TODO (donat) should not be public
     public DefaultBasicProblemBuilder createProblemBuilder() {
         return new DefaultBasicProblemBuilder(namespace);
     }

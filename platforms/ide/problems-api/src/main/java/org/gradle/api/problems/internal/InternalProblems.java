@@ -20,5 +20,10 @@ import org.gradle.api.problems.Problems;
 
 public interface InternalProblems extends Problems {
 
+    /**
+     * Returns a reporter then provides additional problem service functionality specific for Gradle internals.
+     * <p>
+     * @return The reporter.
+     */
     InternalProblemReporter forCoreNamespace();
 }

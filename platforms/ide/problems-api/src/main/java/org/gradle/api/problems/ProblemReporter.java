@@ -34,7 +34,7 @@ public interface ProblemReporter {
     void reporting(ProblemBuilderSpec action);
 
     /**
-     * Configures a new problem with error severity, reports it and uses it to throw a new exception.
+     * Configures a new problem, reports it and uses it to throw a new exception.
      * <p>
      *
      * @return nothing, the method throws an exception
@@ -42,7 +42,7 @@ public interface ProblemReporter {
     RuntimeException throwing(ProblemBuilderSpec action);
 
     /**
-     * Configures a new problem with error severity using an existing exception as input, reports it and uses it to throw a new exception.
+     * Configures a new problem using an existing exception as input, reports it and uses it to throw a new exception.
      * <p>
      *
      * @return nothing, the method throws an exception
