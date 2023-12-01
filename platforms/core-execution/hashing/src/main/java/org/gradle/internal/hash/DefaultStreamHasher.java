@@ -27,7 +27,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class DefaultStreamHasher implements StreamHasher {
     private static final HashCode SIGNATURE = Hashing.signature(DefaultStreamHasher.class);
 
-    private final Queue<byte[]> buffers = new ArrayBlockingQueue<byte[]>(16);
+    private final Queue<byte[]> buffers = new ArrayBlockingQueue<byte[]>(1024);
 
     @Override
     public HashCode hash(InputStream inputStream) {
