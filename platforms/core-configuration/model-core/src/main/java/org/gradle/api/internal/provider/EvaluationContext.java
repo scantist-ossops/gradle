@@ -36,7 +36,7 @@ public class EvaluationContext {
 
     private static final EvaluationContext INSTANCE = new EvaluationContext();
 
-    private final ThreadLocal<ScopeContextInternal> threadLocalContext = ThreadLocal.withInitial(() -> new PerThreadContext(null));
+    private final ThreadLocal<PerThreadContext> threadLocalContext = ThreadLocal.withInitial(() -> new PerThreadContext(null));
 
     // TODO(mlopatkin) Replace with injection.
     public static EvaluationContext current() {
@@ -101,16 +101,16 @@ public class EvaluationContext {
      */
     @SuppressWarnings("try") // We use try-with-resources for side effects
     public <R, E extends Exception> R evaluateNested(ScopedEvaluation<? extends R, E> evaluation) throws E {
-        try (ScopeContext ignored = getContext().nested()) {
+        try (ScopeContext ignored = nested()) {
             return evaluation.evaluate();
         }
     }
 
-    private ScopeContextInternal getContext() {
+    private PerThreadContext getContext() {
         return threadLocalContext.get();
     }
 
-    private ScopeContextInternal setContext(ScopeContextInternal newContext) {
+    private PerThreadContext setContext(PerThreadContext newContext) {
         threadLocalContext.set(newContext);
 
         return newContext;
@@ -125,49 +125,17 @@ public class EvaluationContext {
         return getContext().enter(provider);
     }
 
-    private abstract class ScopeContextInternal implements ScopeContext {
-        public ScopeContextInternal enter(ProviderInternal<?> owner) {
-            PerThreadContext newContext = new PerThreadContext(this);
-            newContext.push(owner);
-            return setContext(newContext);
-        }
-
-        @Override
-        public abstract void close();
-
-        public boolean isInScope(ProviderInternal<?> provider) {
-            return false;
-        }
-
-        public void restore() {
-            setContext(this);
-        }
-
-        public ScopeContextInternal nested() {
-            return setContext(new NestedEvaluationContext(this));
-        }
+    private ScopeContext nested() {
+        return setContext(new PerThreadContext(getContext()));
     }
 
-    private final class NestedEvaluationContext extends ScopeContextInternal {
-        private final ScopeContextInternal parent;
-
-        public NestedEvaluationContext(ScopeContextInternal parent) {
-            this.parent = parent;
-        }
-
-        @Override
-        public void close() {
-            parent.restore();
-        }
-    }
-
-    private final class PerThreadContext extends ScopeContextInternal {
+    private final class PerThreadContext implements ScopeContext {
         private final Set<ProviderInternal<?>> providersInScope = new ReferenceOpenHashSet<>(EXPECTED_MAX_CONTEXT_SIZE);
         private final List<ProviderInternal<?>> providersStack = new ArrayList<>(EXPECTED_MAX_CONTEXT_SIZE);
         @Nullable
-        private final ScopeContextInternal parent;
+        private final PerThreadContext parent;
 
-        public PerThreadContext(@Nullable ScopeContextInternal parent) {
+        public PerThreadContext(@Nullable PerThreadContext parent) {
             this.parent = parent;
         }
 
@@ -184,23 +152,21 @@ public class EvaluationContext {
             providersInScope.remove(removed);
         }
 
-        @Override
-        public ScopeContextInternal enter(ProviderInternal<?> owner) {
+        public PerThreadContext enter(ProviderInternal<?> owner) {
             push(owner);
             return this;
         }
 
         @Override
         public void close() {
-            pop();
-            // Restore the parent context (if any) when the last provider goes out of scope.
+            // Closing the "nested" context.
             if (parent != null && providersStack.isEmpty()) {
-                assert threadLocalContext.get() == this;
-                parent.restore();
+                setContext(parent);
+                return;
             }
+            pop();
         }
 
-        @Override
         public boolean isInScope(ProviderInternal<?> provider) {
             return providersInScope.contains(provider);
         }
@@ -226,7 +192,7 @@ public class EvaluationContext {
 
         @Override
         public String getMessage() {
-            return "Circular evaluation detected: " + formatEvaluationChain(current().getContext(), evaluationCycle);
+            return "Circular evaluation detected: " + formatEvaluationChain(evaluationCycle);
         }
 
         public List<ProviderInternal<?>> getEvaluationCycle() {
@@ -234,8 +200,8 @@ public class EvaluationContext {
         }
 
         @SuppressWarnings("try") // We use try-with-resources for side effects
-        private static String formatEvaluationChain(ScopeContextInternal context, List<ProviderInternal<?>> evaluationCycle) {
-            try (ScopeContextInternal ignored = context.nested()) {
+        private static String formatEvaluationChain(List<ProviderInternal<?>> evaluationCycle) {
+            try (ScopeContext ignored = current().nested()) {
                 return evaluationCycle.stream()
                     .map(CircularEvaluationException::safeToString)
                     .collect(Collectors.joining("\n -> "));
